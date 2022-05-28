@@ -14,11 +14,11 @@ INSERT INTO  User(username, password, user_type)
 VALUES('admin', 'root', 'admin');
 
 INSERT INTO  User(username, password, user_type)
-VALUES('Ali', 'passwd', 'customer'),
-('Mohammad', '1234', 'customer'),
-('Mahdi', 'abcd', 'customer');
+VALUES('Ali', 'passwd', 0),
+('Mohammad', '1234', 0),
+('Mahdi', 'abcd', 1);
 
-INSERT INTo customer(id, phone_number, address)
+INSERT INTo customer(user_id, phone_number, address)
 VALUES(2, '09305898647', 'Lorem ipsum dolor sit amet,
  suas porro viris est te,
   cum ei partem evertitur consetetur.
@@ -64,10 +64,10 @@ VALUES('novel'), ('history'), ('reference'), ('religious'),
 
 -- new orders
 INSERT INTO 'order'(customer_id, quantity, status)
-VALUES(2, 1, 'in_process'), 
-(2, 1, 'delivered'),
-(3, 3, 'in_process'), 
-(4, 2, 'in_process'); 
+VALUES(2, 1, 0), 
+(2, 1, 1),
+(3, 3, 0), 
+(4, 2, 0); 
 
 -- book_categories
 INSERT INTO book_category(book_id, category_id)

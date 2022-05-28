@@ -11,7 +11,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    user_type = db.Column(db.String(10), nullable=False)
+    user_type = db.Column(db.Integer, nullable=False)
     # realations
     customers = db.relationship('Customer', backref='user', lazy=True)
 
@@ -22,17 +22,17 @@ class Customer(db.Model):
     # relations
     orders = db.relationship('Order', backref='customer', lazy=True)
     # foreign keys
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, primary_key=True)
 
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow())
-    status = db.Column(db.String(15), nullable=False)
+    status = db.Column(db.Integer, nullable=False)
     book_id = db.relationship('id', backref='book', lazy=True)
     # foreign keys
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.user_id'), nullable=False)
 
 book_publisher = db.Table('book_publisher',
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'), primary_key=True),
@@ -70,3 +70,6 @@ class Publisher(db.Model):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+
+
+db.create_all()
