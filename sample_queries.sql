@@ -10,10 +10,10 @@
 .schema book_order
 
 -- new users
-INSERT INTO  User(username, password, user_type)
-VALUES('admin', 'root', 'admin');
+INSERT INTO  User(username, password, is_admin)
+VALUES('admin', 'root', 1);
 
-INSERT INTO  User(username, password, user_type)
+INSERT INTO  User(username, password, is_admin)
 VALUES('Ali', 'passwd', 0),
 ('Mohammad', '1234', 0),
 ('Mahdi', 'abcd', 1);
@@ -63,11 +63,11 @@ VALUES('novel'), ('history'), ('reference'), ('religious'),
 ('philosophy'), ('music');
 
 -- new orders
-INSERT INTO 'order'(customer_id, quantity, status)
-VALUES(2, 1, 0), 
-(2, 1, 1),
-(3, 3, 0), 
-(4, 2, 0); 
+INSERT INTO 'order'(customer_id, quantity)
+VALUES(2, 1), 
+(2, 1),
+(3, 3), 
+(4, 2); 
 
 -- book_categories
 INSERT INTO book_category(book_id, category_id)
