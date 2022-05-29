@@ -29,7 +29,6 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow())
-    status = db.Column(db.Integer, nullable=False)
     book_id = db.relationship('id', backref='book', lazy=True)
     # foreign keys
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.user_id'), nullable=False)
