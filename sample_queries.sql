@@ -8,25 +8,26 @@
 .schema book_category
 .schema book_publisher
 .schema book_order
+.tables
 
 -- new users
 INSERT INTO  User(username, password, is_admin)
-VALUES('admin', 'root', 1);
+VALUES('admin', 'root', TRUE);
 
 INSERT INTO  User(username, password, is_admin)
-VALUES('Ali', 'passwd', 0),
-('Mohammad', '1234', 0),
-('Mahdi', 'abcd', 1);
+VALUES('Ali123', 'passwd', FALSE),
+('Mohammad1950', '1234', FALSE),
+('MahdiKing', 'abcd', TRUE);
 
-INSERT INTo customer(user_id, phone_number, address)
-VALUES(2, '09305898647', 'Lorem ipsum dolor sit amet,
+INSERT INTo customer(first_name,last_name, user_id, phone_number, address)
+VALUES('Ali', 'Hasanzadeh', 2, '09305898647', 'Lorem ipsum dolor sit amet,
  suas porro viris est te,
   cum ei partem evertitur consetetur.
    Et pri utroque qualisque delicatissimi.'),
-(3, '09101398655', 'Lorem ipsum dolor sit amet,
+('Mohammad', 'Noruzi', 3, '09101398655', 'Lorem ipsum dolor sit amet,
  suas porro viris est te,
   cum ei partem evertitur consetetur.'),
-(4, '09303291264', 'Lorem ipsum dolor sit amet,
+('Mahdi', 'Ebrahimi', 4, '09303291264', 'Lorem ipsum dolor sit amet,
  suas porro viris est te,
   cum ei partem evertitur consetetur.');
 
@@ -94,4 +95,4 @@ SELECT * from book_category;
 SELECT * from book_publisher;
 SELECT * FROM book_order;
 
-DELETE from book;
+DELETE from user;

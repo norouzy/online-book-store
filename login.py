@@ -1,16 +1,67 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'login.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
-
-
+from logging import exception
 from PyQt5 import QtCore, QtGui, QtWidgets
+from models import db
+from sqlalchemy import text
 
 
 class Ui_MainWindow(object):
+
+# ------------------------connector functions start--------------------------
+    def loginHandle(self):
+
+        username = self.login_username.text()
+        password = self.login_password.text()
+
+        if username and password:
+            query = f"SELECT COUNT(*) FROM User WHERE username='{username}' and password='{password}'"     
+            result = db.engine.execute(text(query))
+            authenticated = True if list(result)[0][0] == 1 else False
+
+            print('user authenticated: ', authenticated)
+
+        else:
+            print('field/fields can not be empty!')
+        
+
+    def signUpHandle(self):  
+
+        valuesDict = {
+            'first_name': self.lineEdit_2.text(),
+            'last_name': self.lineEdit.text(),
+            'username': self.username_sign.text(),
+            'password': self.password_sign.text(),
+            'phone_number': self.phoneNumber_sign.text(),
+            'address': self.address_sign.toPlainText()
+        }
+
+        query = f"SELECT COUNT(*) from User WHERE username='{valuesDict['username']}'"
+        result = db.engine.execute(text(query))
+        user_exists = True if list(result)[0][0] == 1 else False
+
+        if '' in valuesDict.values():
+            print('field/fields can not be empty!')
+
+        elif user_exists:
+            print('another user with this username found!')
+
+        elif len(valuesDict['password']) < 5:
+            print('weak password!')
+
+        elif not valuesDict['phone_number'].isdigit():
+            print('wrong phone number!')
+
+        else:  
+            query = f"INSERT INTO User(username, password, is_admin) VALUES('{valuesDict['username']}', '{valuesDict['password']}', FALSE)"
+            db.engine.execute(text(query))
+            query = f"SELECT id FROM User WHERE username='{valuesDict['username']}'"
+            result = db.engine.execute(text(query))
+            user_id = list(result)[0][0]
+            query = f"INSERT INTO Customer(first_name, last_name, user_id, phone_number, address) VALUES('{valuesDict['first_name']}', '{valuesDict['last_name']}', {user_id}, '{valuesDict['phone_number']}', '{valuesDict['address']}')"
+            db.engine.execute(text(query))
+            print('user created!')
+
+# ------------------------connector functions ending--------------------------
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(340, 500)
@@ -121,6 +172,10 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        # ----------------------- connectors start-------------------------
+        self.login_btn.clicked.connect(self.loginHandle)
+        self.signin_btn.clicked.connect(self.signUpHandle)
+        # ----------------------- connectors ending-------------------------
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)

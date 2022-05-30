@@ -17,7 +17,7 @@ class User(db.Model):
 
 
 class Customer(db.Model):
-    name = db.Column(db.String(50), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(70), nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text)
