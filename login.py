@@ -127,7 +127,7 @@ class Ui_MainWindow(object):
         self.login_btn.clicked.connect(MainWindow.update)
         self.signin_btn.clicked.connect(MainWindow.showFullScreen)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
+        
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Online Book Store"))
