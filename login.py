@@ -26,8 +26,8 @@ class Ui_MainWindow(object):
     def signUpHandle(self):  
 
         valuesDict = {
-            'first_name': self.lineEdit_2.text(),
-            'last_name': self.lineEdit.text(),
+            'first_name': self.last_name.text(),
+            'last_name': self.first_name.text(),
             'username': self.username_sign.text(),
             'password': self.password_sign.text(),
             'phone_number': self.phoneNumber_sign.text(),
@@ -142,12 +142,12 @@ class Ui_MainWindow(object):
         self.username_sign = QtWidgets.QLineEdit(self.formWidget_2)
         self.username_sign.setObjectName("username_sign")
         self.gridLayout_2.addWidget(self.username_sign, 3, 1, 1, 1)
-        self.lineEdit = QtWidgets.QLineEdit(self.formWidget_2)
-        self.lineEdit.setObjectName("lineEdit")
-        self.gridLayout_2.addWidget(self.lineEdit, 2, 1, 1, 1)
-        self.lineEdit_2 = QtWidgets.QLineEdit(self.formWidget_2)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.gridLayout_2.addWidget(self.lineEdit_2, 1, 1, 1, 1)
+        self.first_name = QtWidgets.QLineEdit(self.formWidget_2)
+        self.first_name.setObjectName("first_name")
+        self.gridLayout_2.addWidget(self.first_name, 2, 1, 1, 1)
+        self.last_name = QtWidgets.QLineEdit(self.formWidget_2)
+        self.last_name.setObjectName("last_name")
+        self.gridLayout_2.addWidget(self.last_name, 1, 1, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.formWidget_2)
         self.label_4.setObjectName("label_4")
         self.gridLayout_2.addWidget(self.label_4, 4, 0, 1, 1)
@@ -180,7 +180,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         self.login_btn.clicked.connect(MainWindow.update)
-        self.signin_btn.clicked.connect(MainWindow.showFullScreen)
+        self.signin_btn.clicked.connect(MainWindow.update)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
     def retranslateUi(self, MainWindow):
