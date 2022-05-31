@@ -48,7 +48,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="list">
      <attribute name="title">
@@ -108,7 +108,7 @@
                 <height>136</height>
                </rect>
               </property>
-              <layout class="QGridLayout" name="gridLayout_7">
+              <layout class="QGridLayout" name="gridLayout_list_0">
                <item row="0" column="0">
                 <widget class="QLabel" name="label_list_name_0">
                  <property name="text">
@@ -319,7 +319,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout_11">
         <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_category_main">
           <item row="0" column="0">
            <widget class="QFrame" name="frame_category_0">
             <property name="minimumSize">
@@ -451,7 +451,7 @@
          <height>181</height>
         </rect>
        </property>
-       <layout class="QFormLayout" name="formLayout">
+       <layout class="QFormLayout" name="formLayout_publisher_main">
         <item row="0" column="0">
          <widget class="QLabel" name="label_publisher_name">
           <property name="text">
@@ -544,7 +544,7 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QScrollArea" name="scrollArea_6">
+     <widget class="QScrollArea" name="scrollArea_publisher_main">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -556,7 +556,7 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents_6">
+      <widget class="QWidget" name="scrollAreaWidgetContents_publisher">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -567,9 +567,9 @@
        </property>
        <layout class="QGridLayout" name="gridLayout_18">
         <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout_19">
+         <layout class="QGridLayout" name="gridLayout_publisher_main">
           <item row="0" column="0">
-           <widget class="QFrame" name="frame_33">
+           <widget class="QFrame" name="frame_publisher_0">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -667,7 +667,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <layout class="QGridLayout" name="gridLayout">
+       <layout class="QGridLayout" name="gridLayout_addbook_main">
         <item row="0" column="0">
          <widget class="QLabel" name="label_addbook_name">
           <property name="text">
@@ -729,7 +729,7 @@
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_2">
+          <widget class="QWidget" name="scrollAreaWidgetContents_addbook_main">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -885,7 +885,7 @@
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents_3">
+         <widget class="QWidget" name="scrollAreaWidgetContents_user_main">
           <property name="geometry">
            <rect>
             <x>0</x>
@@ -924,7 +924,7 @@
                 <height>52</height>
                </rect>
               </property>
-              <layout class="QGridLayout" name="gridLayout_13">
+              <layout class="QGridLayout" name="gridLayout_user_0">
                <item row="0" column="6">
                 <widget class="QPushButton" name="btn_user_update_0">
                  <property name="maximumSize">
@@ -1101,7 +1101,7 @@
                 <height>52</height>
                </rect>
               </property>
-              <layout class="QGridLayout" name="gridLayout_10">
+              <layout class="QGridLayout" name="gridLayout_user_header">
                <item row="0" column="3">
                 <widget class="QLabel" name="label_user_phone">
                  <property name="minimumSize">
@@ -1483,7 +1483,7 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents_4">
+      <widget class="QWidget" name="scrollAreaWidgetContents_inventory">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -1501,7 +1501,7 @@
           <height>391</height>
          </rect>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout_inventory_main">
          <item>
           <widget class="QFrame" name="frame_inventory_0">
            <property name="frameShape">
