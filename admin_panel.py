@@ -1,17 +1,21 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'admin_panel.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from models import db
+from sqlalchemy import text
 
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
+
+    # callback functions
+
+    def buyBook(self, book_id):
+        print(book_id)
+
+    def search(self, input):
+        print('input: ' + input)
+        
+    # layout functions
+
+    def setupUi(self, MainWindow, allBooks):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(895, 648)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -42,7 +46,11 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout_5 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout_5.setObjectName("gridLayout_5")
-        for i in range(0,2):
+
+        # elements creation
+        buttons = []
+        for index, item in enumerate(allBooks):
+            # layout
             self.frame_list_0 = QtWidgets.QFrame(self.scrollAreaWidgetContents)
             self.frame_list_0.setMaximumSize(QtCore.QSize(485, 150))
             self.frame_list_0.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -69,15 +77,27 @@ class Ui_MainWindow(object):
             self.label_list_publisher_0 = QtWidgets.QLabel(self.gridLayoutWidget)
             self.label_list_publisher_0.setObjectName("label_list_publisher_0")
             self.gridLayout_list_0.addWidget(self.label_list_publisher_0, 3, 0, 1, 1)
-            self.btn_list_buy_0 = QtWidgets.QPushButton(self.gridLayoutWidget)
-            self.btn_list_buy_0.setObjectName("btn_list_buy_0")
-            self.gridLayout_list_0.addWidget(self.btn_list_buy_0, 6, 0, 1, 1)
-            self.gridLayout_5.addWidget(self.frame_list_0, i, 1, 1, 1)
+            # buttons creation + callback function
+            buttons.append(QtWidgets.QPushButton(self.gridLayoutWidget))
+            buttons[index].setObjectName(str(item[0]))
+            self.gridLayout_list_0.addWidget(buttons[index], 6, 0, 1, 1)
+            buttons[index].clicked.connect(lambda ch, index=index: self.buyBook(buttons[index].objectName()))
+            # pic
+            self.gridLayout_5.addWidget(self.frame_list_0, index, 1, 1, 1)
             self.list_picture_0 = QtWidgets.QGraphicsView(self.scrollAreaWidgetContents)
             self.list_picture_0.setMinimumSize(QtCore.QSize(220, 150))
             self.list_picture_0.setMaximumSize(QtCore.QSize(220, 150))
             self.list_picture_0.setObjectName("list_picture_0")
-            self.gridLayout_5.addWidget(self.list_picture_0, i, 0, 1, 1)
+            self.gridLayout_5.addWidget(self.list_picture_0, index, 0, 1, 1)
+            # giving values
+            self.label_list_name_0.setText('book name: ' + item[1])
+            self.label_list_quantity_0.setText('number in stock: ' + str(item[7]))
+            self.label_list_author_0.setText('author: ' + item[2])
+            self.label_list_price_0.setText('price: ' + str(item[4]))
+            self.label_list_publisher_0.setText('publisher: ' + item[11])
+           
+
+      
         self.scrollArea_book_list.setWidget(self.scrollAreaWidgetContents)
         self.input_list_search = QtWidgets.QLineEdit(self.frame_list_main)
         self.input_list_search.setGeometry(QtCore.QRect(490, 20, 281, 24))
@@ -85,6 +105,8 @@ class Ui_MainWindow(object):
         self.btn_list_search = QtWidgets.QPushButton(self.frame_list_main)
         self.btn_list_search.setGeometry(QtCore.QRect(780, 20, 80, 24))
         self.btn_list_search.setObjectName("btn_list_search")
+        # search button event listener
+        self.btn_list_search.clicked.connect(lambda: self.search(self.input_list_search.text()))
         self.checkBox_list_lp = QtWidgets.QCheckBox(self.frame_list_main)
         self.checkBox_list_lp.setGeometry(QtCore.QRect(10, 10, 91, 22))
         self.checkBox_list_lp.setObjectName("checkBox_list_lp")
@@ -604,20 +626,22 @@ class Ui_MainWindow(object):
         self.label_login_username.setObjectName("label_login_username")
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
+        self.retranslateUi(MainWindow, buttons)
         self.tabWidget.setCurrentIndex(0)
         self.btn_list_show.clicked.connect(MainWindow.update)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, MainWindow, buttons):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label_list_name_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Harry Patter</span></p></body></html>"))
-        self.label_list_quantity_0.setText(_translate("MainWindow", "<html><head/><body><p>quntity : 25</p></body></html>"))
-        self.label_list_author_0.setText(_translate("MainWindow", "<html><head/><body><p>by : Wilson miler</p></body></html>"))
-        self.label_list_price_0.setText(_translate("MainWindow", "<html><head/><body><p>price : 12000 $</p></body></html>"))
-        self.label_list_publisher_0.setText(_translate("MainWindow", "<html><head/><body><p>Publisher : tolo</p></body></html>"))
-        self.btn_list_buy_0.setText(_translate("MainWindow", "Buy"))
+        # self.label_list_name_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Harry Patter</span></p></body></html>"))
+        # self.label_list_quantity_0.setText(_translate("MainWindow", "<html><head/><body><p>quntity : 25</p></body></html>"))
+        # self.label_list_author_0.setText(_translate("MainWindow", "<html><head/><body><p>by : Wilson miler</p></body></html>"))
+        # self.label_list_price_0.setText(_translate("MainWindow", "<html><head/><body><p>price : 12000 $</p></body></html>"))
+        # self.label_list_publisher_0.setText(_translate("MainWindow", "<html><head/><body><p>Publisher : tolo</p></body></html>"))
+        for btn in buttons:
+            btn.setText(_translate("MainWindow", "Buy"))
+        # self.btn_list_buy_0.setText(_translate("MainWindow", "Buy"))
         self.btn_list_search.setText(_translate("MainWindow", "Search"))
         self.checkBox_list_lp.setText(_translate("MainWindow", "lowest price"))
         self.checkBox_list_ex.setText(_translate("MainWindow", "expensive"))
@@ -741,7 +765,10 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
+    # display books after page loaded
+    query = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id"    
+    allBooks = db.engine.execute(text(query))
     ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
+    ui.setupUi(MainWindow, list(allBooks))
     MainWindow.show()
     sys.exit(app.exec_())
