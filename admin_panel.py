@@ -1,21 +1,31 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from models import db
 from sqlalchemy import text
 
 
 class Ui_MainWindow(object):
 
-    # callback functions
+    def __init__(self, allBooks):
+        self.allBooks = allBooks
+        self.buttons = None
 
+
+    # callback functions
     def buyBook(self, book_id):
         print(book_id)
 
     def search(self, input):
-        print('input: ' + input)
+        if input:
+            query = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id WHERE Book.name LIKE '%{input}%' OR Book.author LIKE '%{input}%' OR Publisher.name LIKE '%{input}%'" 
+            books = db.engine.execute(text(query))  
+            self.scrollAreaWidgetContents.deleteLater()
+            self.setupUi(MainWindow, books)
+        else:
+            self.setupUi(MainWindow)
+
         
     # layout functions
-
-    def setupUi(self, MainWindow, allBooks):
+    def setupUi(self, MainWindow, filtererdItems=None):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(895, 648)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -48,8 +58,14 @@ class Ui_MainWindow(object):
         self.gridLayout_5.setObjectName("gridLayout_5")
 
         # elements creation
-        buttons = []
-        for index, item in enumerate(allBooks):
+        self.buttons = []
+
+        if filtererdItems:
+            books = filtererdItems
+        else:
+            books = self.allBooks
+
+        for index, item in enumerate(books):
             # layout
             self.frame_list_0 = QtWidgets.QFrame(self.scrollAreaWidgetContents)
             self.frame_list_0.setMaximumSize(QtCore.QSize(485, 150))
@@ -78,10 +94,10 @@ class Ui_MainWindow(object):
             self.label_list_publisher_0.setObjectName("label_list_publisher_0")
             self.gridLayout_list_0.addWidget(self.label_list_publisher_0, 3, 0, 1, 1)
             # buttons creation + callback function
-            buttons.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-            buttons[index].setObjectName(str(item[0]))
-            self.gridLayout_list_0.addWidget(buttons[index], 6, 0, 1, 1)
-            buttons[index].clicked.connect(lambda ch, index=index: self.buyBook(buttons[index].objectName()))
+            self.buttons.append(QtWidgets.QPushButton(self.gridLayoutWidget))
+            self.buttons[index].setObjectName(str(item[0]))
+            self.gridLayout_list_0.addWidget(self.buttons[index], 6, 0, 1, 1)
+            self.buttons[index].clicked.connect(lambda ch, index=index: self.buyBook(self.buttons[index].objectName()))
             # pic
             self.gridLayout_5.addWidget(self.frame_list_0, index, 1, 1, 1)
             self.list_picture_0 = QtWidgets.QGraphicsView(self.scrollAreaWidgetContents)
@@ -95,9 +111,7 @@ class Ui_MainWindow(object):
             self.label_list_author_0.setText('author: ' + item[2])
             self.label_list_price_0.setText('price: ' + str(item[4]))
             self.label_list_publisher_0.setText('publisher: ' + item[11])
-           
-
-      
+    
         self.scrollArea_book_list.setWidget(self.scrollAreaWidgetContents)
         self.input_list_search = QtWidgets.QLineEdit(self.frame_list_main)
         self.input_list_search.setGeometry(QtCore.QRect(490, 20, 281, 24))
@@ -626,12 +640,12 @@ class Ui_MainWindow(object):
         self.label_login_username.setObjectName("label_login_username")
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow, buttons)
+        self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         self.btn_list_show.clicked.connect(MainWindow.update)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow, buttons):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         # self.label_list_name_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Harry Patter</span></p></body></html>"))
@@ -639,7 +653,7 @@ class Ui_MainWindow(object):
         # self.label_list_author_0.setText(_translate("MainWindow", "<html><head/><body><p>by : Wilson miler</p></body></html>"))
         # self.label_list_price_0.setText(_translate("MainWindow", "<html><head/><body><p>price : 12000 $</p></body></html>"))
         # self.label_list_publisher_0.setText(_translate("MainWindow", "<html><head/><body><p>Publisher : tolo</p></body></html>"))
-        for btn in buttons:
+        for btn in self.buttons:
             btn.setText(_translate("MainWindow", "Buy"))
         # self.btn_list_buy_0.setText(_translate("MainWindow", "Buy"))
         self.btn_list_search.setText(_translate("MainWindow", "Search"))
@@ -768,7 +782,7 @@ if __name__ == "__main__":
     # display books after page loaded
     query = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id"    
     allBooks = db.engine.execute(text(query))
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow, list(allBooks))
+    ui = Ui_MainWindow(list(allBooks))
+    ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
