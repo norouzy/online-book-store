@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
-from models import db
+from tables import db
 from sqlalchemy import text
 from PyQt5.QtGui import QPixmap
 
@@ -94,6 +94,8 @@ class Ui_MainWindow(object):
             self.filteredQuery = None
             self.books = self.allBooks
 
+
+        self.filterOptions = []
         self.setupUi(MainWindow)
 
     

@@ -1,12 +1,10 @@
-from logging import exception
 from PyQt5 import QtCore, QtGui, QtWidgets
-from models import db
+from tables import db
 from sqlalchemy import text
 
 
 class Ui_MainWindow(object):
 
-# ------------------------connector functions start--------------------------
     def loginHandle(self):
 
         username = self.login_username.text()
@@ -60,7 +58,6 @@ class Ui_MainWindow(object):
             db.engine.execute(text(query))
             print('user created!')
 
-# ------------------------connector functions ending--------------------------
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
