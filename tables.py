@@ -85,6 +85,6 @@ tableQueries = [
 ]
 
 
-for table in tableQueries:
-    print(table)
-    db.engine.execute(text(table))
+# for table in tableQueries:
+#     print(table)
+#     db.engine.execute(text(table))
