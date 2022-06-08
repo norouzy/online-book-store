@@ -2,6 +2,8 @@ from PyQt5 import QtCore, QtWidgets
 from tables import db
 from sqlalchemy import text
 from PyQt5.QtGui import QPixmap
+import shutil
+import re
 
 
 class Ui_MainWindow(object):
@@ -15,6 +17,7 @@ class Ui_MainWindow(object):
         self.pictures = None
         self.buttons = None
         self.filterOptions = []
+        self.categoryBoxes = []
     
 
     def fillBooks(self):
@@ -86,8 +89,6 @@ class Ui_MainWindow(object):
         if input:
             self.filteredQuery = self.baseQuery + f" WHERE Book.name LIKE '%{input}%' OR Book.author LIKE '%{input}%' OR Publisher.name LIKE '%{input}%'" 
             self.books = db.engine.execute(text(self.filteredQuery))
-            for obj in self.objects:
-                obj.deleteLater()
             self.removeBooks()
             
         else:
@@ -145,6 +146,105 @@ class Ui_MainWindow(object):
             self.removeBooks()
             self.fillBooks() 
             self.retranslateUi(MainWindow)
+
+
+    def addPublisher(self):
+   
+        inputDict = {
+            'name': self.input_publisher_name.text(),
+            'phone_number': self.input_publisher_number.text(),
+            'website_url': self.input_publisher_web.text()
+        }
+
+        query = f"SELECT COUNT(*) from Publisher WHERE name='{inputDict['name']}'"
+        result = db.engine.execute(text(query))
+        publisher_exists = True if list(result)[0][0] == 1 else False
+
+        if '' in inputDict.values():
+            print('field/fields can not be empty!')
+
+        elif publisher_exists:
+            print('another publisher with this name found!')
+
+        elif not inputDict['phone_number'].isdigit():
+            print('wrong phone number!')
+
+        else:  
+            query = f"INSERT INTO Publisher(name, phone_number, website_url) VALUES('{inputDict['name']}', '{inputDict['phone_number']}', '{inputDict['website_url']}')"
+            db.engine.execute(text(query))
+            print('new publisher added!')
+
+
+
+    def addBook(self):
+        
+        inputDict = {
+            'name': self.input_publisher_name_2.text(),
+            'author': self.input_publisher_author.text(),
+            'price': self.input_publisher_price.text(),
+            'quantity': self.input_publisher_quantity.text(),
+            'description': self.plainTextEdit_publisher_description.toPlainText(),
+            'publisher': self.select_addbook_publisher.currentText(),
+            'image_url': self.input_addbook_picture.text()
+        }
+        
+        if not '' in inputDict.values():
+
+            query = f"SELECT id FROM Book WHERE name='{inputDict['name']}'"
+            result1 = list(db.engine.execute(text(query)))
+            query = f"SELECT id FROM Publisher WHERE name='{inputDict['publisher']}'"
+            publisher_id = list(db.engine.execute(text(query)))[0][0]
+
+            if result1:
+                query = f"SELECT EXISTS(SELECT * FROM book_publisher WHERE book_id={result1[0][0]} and publisher_id={publisher_id})"
+                result = list(db.engine.execute(query))[0][0]
+                bookExists = False if result == 0 else True
+            else:
+                bookExists = False
+
+           
+            if bookExists:
+                print('another book with this name and publisher found!')
+            
+            elif not inputDict['price'].isdigit():
+                print('wrong price input!!')
+
+            elif not inputDict['quantity'].isdigit():
+                print('wrong quantity input!!')
+
+            else:      
+                try:
+                    url = inputDict['image_url'][::-1]
+                    x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
+                    url = url[x.start() : x.end()][::-1]
+                    shutil.copy(inputDict['image_url'], 'online-book-store\pictures')
+
+                    query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', 'pictures{url}', {inputDict['price']}, '{inputDict['description']}')"
+                    db.engine.execute(text(query))
+                    query = f"SELECT id FROM Book WHERE name='{inputDict['name']}'"
+                    insertedBook_id = list(db.engine.execute(text(query)))[0][0]
+                    query = f"INSERT INTO book_publisher(book_id, publisher_id, quantity) VALUES({insertedBook_id}, {publisher_id}, {inputDict['quantity']})"
+                    db.engine.execute(text(query))
+
+                    for cat in self.categoryBoxes:
+                        if cat.isChecked():
+                            query = f"SELECT id FROM category WHERE name='{cat.objectName()}'"
+                            category_id = list(db.engine.execute(text(query)))[0][0]
+                            query = f"INSERT INTO book_category(book_id, category_id) VALUES({insertedBook_id}, {category_id})"
+                            db.engine.execute(text(query))
+
+                except:
+                    print('something where wrong while uploading photo!')
+
+        else:
+            print('field/fields can not be empty!')
+        
+
+
+    def getPicture(self):
+        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'book photo', '', '*.jpg')
+        self.input_addbook_picture.setText(url)
+        
 
     # layout functions
     def setupUi(self, MainWindow):
@@ -301,6 +401,8 @@ class Ui_MainWindow(object):
         self.btn_publisher_add = QtWidgets.QPushButton(self.formLayoutWidget)
         self.btn_publisher_add.setObjectName("btn_publisher_add")
         self.formLayout_publisher_main.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.btn_publisher_add)
+        # new publisher button event listener
+        self.btn_publisher_add.clicked.connect(lambda: self.addPublisher())
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.formLayout_publisher_main.setItem(1, QtWidgets.QFormLayout.FieldRole, spacerItem)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -367,19 +469,23 @@ class Ui_MainWindow(object):
         self.input_publisher_author = QtWidgets.QLineEdit(self.add)
         self.input_publisher_author.setObjectName("input_publisher_author")
         self.gridLayout_addbook_main.addWidget(self.input_publisher_author, 1, 1, 1, 1)
-        self.label_addbook_category = QtWidgets.QLabel(self.add)
-        self.label_addbook_category.setObjectName("label_addbook_category")
-        self.gridLayout_addbook_main.addWidget(self.label_addbook_category, 6, 0, 1, 1)
+       
         self.label_addbook_description = QtWidgets.QLabel(self.add)
         self.label_addbook_description.setObjectName("label_addbook_description")
         self.gridLayout_addbook_main.addWidget(self.label_addbook_description, 4, 0, 1, 1)
         self.plainTextEdit_publisher_description = QtWidgets.QPlainTextEdit(self.add)
         self.plainTextEdit_publisher_description.setObjectName("plainTextEdit_publisher_description")
         self.gridLayout_addbook_main.addWidget(self.plainTextEdit_publisher_description, 4, 1, 1, 1)
+        # publisher selection
         self.select_addbook_publisher = QtWidgets.QComboBox(self.add)
         self.select_addbook_publisher.setObjectName("select_addbook_publisher")
-        self.select_addbook_publisher.addItem("")
+        # self.select_addbook_publisher.addItem("")
+        result = list(db.engine.execute(text("SELECT name FROM Publisher")))
+        publishers = [res[0] for res in result]
+        
+        self.select_addbook_publisher.addItems(publishers)
         self.gridLayout_addbook_main.addWidget(self.select_addbook_publisher, 5, 1, 1, 1)
+
         self.input_publisher_quantity = QtWidgets.QLineEdit(self.add)
         self.input_publisher_quantity.setObjectName("input_publisher_quantity")
         self.gridLayout_addbook_main.addWidget(self.input_publisher_quantity, 3, 1, 1, 1)
@@ -389,11 +495,25 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents_addbook_main = QtWidgets.QWidget()
         self.scrollAreaWidgetContents_addbook_main.setGeometry(QtCore.QRect(0, 0, 777, 72))
         self.scrollAreaWidgetContents_addbook_main.setObjectName("scrollAreaWidgetContents_addbook_main")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_addbook_main)
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.checkBox_addbook_category_0 = QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main)
-        self.checkBox_addbook_category_0.setObjectName("checkBox_addbook_category_0")
-        self.gridLayout_4.addWidget(self.checkBox_addbook_category_0, 0, 0, 1, 1)
+        # categores selection
+        self.categoryBoxes = []
+        x = 10
+        catResult = list(db.engine.execute(text("SELECT name FROM category")))
+
+        for index, cat in enumerate(catResult):
+
+            self.categoryBoxes.append(QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main))
+            self.categoryBoxes[index].setObjectName(cat[0])
+
+            if index % 2 == 0:
+                x += 100
+                y = 2
+            else:
+                y = 32
+   
+            self.categoryBoxes[index].setGeometry(QtCore.QRect(x, y, 83, 22))
+  
+        
         self.scrollArea_addbook_category.setWidget(self.scrollAreaWidgetContents_addbook_main)
         self.gridLayout_addbook_main.addWidget(self.scrollArea_addbook_category, 6, 1, 1, 1)
         self.label_addbook_quantity = QtWidgets.QLabel(self.add)
@@ -402,6 +522,8 @@ class Ui_MainWindow(object):
         self.btn_addbook_submit = QtWidgets.QPushButton(self.add)
         self.btn_addbook_submit.setObjectName("btn_addbook_submit")
         self.gridLayout_addbook_main.addWidget(self.btn_addbook_submit, 8, 1, 1, 1)
+        # add book button event listener
+        self.btn_addbook_submit.clicked.connect(lambda: self.addBook())
         self.label_addbook_publisher = QtWidgets.QLabel(self.add)
         self.label_addbook_publisher.setObjectName("label_addbook_publisher")
         self.gridLayout_addbook_main.addWidget(self.label_addbook_publisher, 5, 0, 1, 1)
@@ -419,10 +541,13 @@ class Ui_MainWindow(object):
         self.btn_addbook_broswer = QtWidgets.QPushButton(self.frame_addbook_picture)
         self.btn_addbook_broswer.setGeometry(QtCore.QRect(510, 10, 80, 21))
         self.btn_addbook_broswer.setObjectName("btn_addbook_broswer")
+        # addBook browse button event listener
+        self.btn_addbook_broswer.clicked.connect(lambda: self.getPicture())
         self.input_addbook_picture = QtWidgets.QLineEdit(self.frame_addbook_picture)
         self.input_addbook_picture.setGeometry(QtCore.QRect(0, 10, 500, 21))
         self.input_addbook_picture.setMinimumSize(QtCore.QSize(500, 0))
         self.input_addbook_picture.setObjectName("input_addbook_picture")
+        
         self.gridLayout_addbook_main.addWidget(self.frame_addbook_picture, 7, 1, 1, 1)
         self.gridLayout_3.addLayout(self.gridLayout_addbook_main, 2, 0, 1, 1)
         self.label_addbook_title = QtWidgets.QLabel(self.add)
@@ -763,10 +888,14 @@ class Ui_MainWindow(object):
         self.label_addbook_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">name</span></p></body></html>"))
         self.label_addbook_picture.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">Picture</span></p></body></html>"))
         self.label_addbook_author.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">author</span></p></body></html>"))
-        self.label_addbook_category.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">category</span></p></body></html>"))
+        # self.label_addbook_category.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">category</span></p></body></html>"))
         self.label_addbook_description.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">description</span></p><p align=\"center\"><br/></p></body></html>"))
-        self.select_addbook_publisher.setItemText(0, _translate("MainWindow", "advanture"))
-        self.checkBox_addbook_category_0.setText(_translate("MainWindow", "CheckBox"))
+        # self.select_addbook_publisher.setItemText(0, _translate("MainWindow", "select"))
+        
+        # addbook categories checkboxes
+        for bx in self.categoryBoxes:
+            bx.setText(_translate("MainWindow", bx.objectName()))
+
         self.label_addbook_quantity.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">quantity</span></p></body></html>"))
         self.btn_addbook_submit.setText(_translate("MainWindow", "Submit"))
         self.label_addbook_publisher.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">pulisher</span></p></body></html>"))
