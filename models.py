@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy import text
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -13,7 +14,7 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     # realations
-    customers = db.relationship('Customer', backref='user', lazy=True)
+    customers = db.relationship('Customer', cascade="all,delete", backref='user', lazy=True)
 
 
 class Customer(db.Model):
@@ -22,7 +23,7 @@ class Customer(db.Model):
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text)
     # relations
-    orders = db.relationship('Order', backref='customer', lazy=True)
+    orders = db.relationship('Order', cascade="all,delete", backref='customer', lazy=True)
     # foreign keys
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, primary_key=True)
 
@@ -38,6 +39,7 @@ class Order(db.Model):
 book_publisher = db.Table('book_publisher',
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'), primary_key=True),
     db.Column('publisher_id', db.Integer, db.ForeignKey('publisher.id'), primary_key=True)
+    
 )
 book_category = db.Table('book_category',
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'), primary_key=True),
@@ -56,11 +58,10 @@ class Book(db.Model):
     price = db.Column(db.Float, nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow())
     description = db.Column(db.Text)
-    quantity = db.Column(db.Integer, nullable=False)
     # relations
-    publishers = db.relationship('Publisher', secondary=book_publisher, lazy='subquery', backref=db.backref('books', lazy=True))
-    categories = db.relationship('Category', secondary=book_category, lazy='subquery', backref=db.backref('books', lazy=True))
-    orders = db.relationship('Order', secondary=book_order, lazy='subquery', backref=db.backref('books', lazy=True))
+    publishers = db.relationship('Publisher', cascade="all,delete", secondary=book_publisher, lazy='subquery', backref=db.backref('books', lazy=True))
+    categories = db.relationship('Category', cascade="all,delete",secondary=book_category, lazy='subquery', backref=db.backref('books', lazy=True))
+    orders = db.relationship('Order', cascade="all,delete",secondary=book_order, lazy='subquery', backref=db.backref('books', lazy=True))
 
 class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -74,3 +75,5 @@ class Category(db.Model):
 
 
 db.create_all()
+new_col = f"ALTER TABLE book_publisher ADD quantity INT NOT NULL"
+db.engine.execute(text(new_col))

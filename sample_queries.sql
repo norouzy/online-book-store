@@ -1,9 +1,9 @@
 -- table schemas
 .schema book
-.schema user
+.schema User
 .schema customer
 .schema category
-.schema order
+.schema book_order
 .schema publisher
 .schema book_category
 .schema book_publisher
@@ -33,22 +33,21 @@ VALUES('Ali', 'Hasanzadeh', 2, '09305898647', 'Lorem ipsum dolor sit amet,
 
 
 -- new books
-INSERT INTO book(name, author, picture_url, price, description, quantity)
+INSERT INTO book(name, author, picture_url, price, description)
 VALUES('Nineteen Eighty-Four', 'George Orwell','pictures/1984.jpg', 
-80000, 'Lorem ipsum dolor sit amet, te eam elit modus homero vis.', 19),
+80000, 'Lorem ipsum dolor sit amet, te eam elit modus homero vis.'),
 ('The Plague', 'Albert Camus','pictures/the_plague.jpg', 
-106000, 'Lorem ipsum dolor sit amet', 7), 
+106000, 'Lorem ipsum dolor sit amet'), 
 ('Java: How to Program', 'Harvey Deitel and Paul Deitel','pictures/Java_How_to_Program.jpg', 
 190000, 'Lorem ipsum dolor sit amet,
  nam ut facer erant quaestio,
- duo cu scripta epicurei philosophia. Molestie repudiandae.', 33), 
+ duo cu scripta epicurei philosophia. Molestie repudiandae.'), 
 ('Under the Banner of Heaven', 'Jon Krakauer','pictures/under_the_banner_of_heaven.jpg', 
 77000, 'Lorem ipsum dolor sit amet, 
-diam summo duo ad, ne inani tractatos torquatos pro.', 14), 
+diam summo duo ad, ne inani tractatos torquatos pro.'), 
 ('Mein Kampf', 'Adolf Hitle','pictures/mein_kampf.jpg', 
 98400, 'Lorem ipsum dolor sit amet, 
-diam summo duo ad', 
-40);
+diam summo duo ad');
 
 -- new publishers
 INSERT INTO publisher(name, phone_number, website_url)
@@ -64,11 +63,11 @@ VALUES('novel'), ('history'), ('reference'), ('religious'),
 ('philosophy'), ('music');
 
 -- new orders
-INSERT INTO 'order'(customer_id, quantity)
-VALUES(2, 1), 
-(2, 1),
-(3, 3), 
-(4, 2); 
+INSERT INTO book_order(book_id, customer_id, quantity)
+VALUES(1, 2, 1), 
+(4, 2, 3),
+(1, 3, 3), 
+(3, 4, 1); 
 
 -- book_categories
 INSERT INTO book_category(book_id, category_id)
@@ -76,23 +75,26 @@ VALUES(1, 1), (2, 1), (2, 2), (2, 5), (3, 3), (4, 4),
 (4, 5), (5, 1), (5, 2);
 
 -- book_publishers
-INSERT INTO book_publisher(book_id, publisher_id)
-VALUES(1, 3), (1, 5), (2, 3), (3, 1), (4, 4), (4, 2), 
-(4, 5), (5, 1);
-
--- book_orders
-INSERT INTO book_order(order_id, book_id)
-VALUES(1, 3), (2, 4), (3, 1), (4, 4);
+INSERT INTO book_publisher(book_id, publisher_id, quantity)
+VALUES(1, 3, 5), (1, 5, 10), (2, 3, 16), (3, 1, 1), (4, 4, 17), (4, 2, 110), 
+(4, 5, 76), (5, 1, 35);
 
 
 SELECT * FROM user;
 SELECT * from customer;
 SELECT * FROM book;
 SELECT * from publisher;
-SELECT * from category;
-SELECT * from 'order';
-SELECT * from book_category;
 SELECT * from book_publisher;
+SELECT * from category;
+SELECT * from book_category;
 SELECT * FROM book_order;
-
+select *
+ from book join book_publisher on book.id=book_publisher.book_id
+    join publisher on publisher.id=publisher_id;
 DELETE from user;
+
+ALTER TABLE book_publisher ADD quentity INT NOT NULL;
+
+SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id order by book.price ,book.date_added desc;
+
+SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id where Book.name LIKE '%nin%' order by book.price;
