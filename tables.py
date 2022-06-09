@@ -41,7 +41,7 @@ tableQueries = [
      
     "CREATE TABLE Publisher("
     +"\n    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-    +"\n    name VARCHAR(100) NOT NULL,"
+    +"\n    name VARCHAR(100) UNIQUE NOT NULL,"
     +"\n    phone_number VARCHAR(20) NOT NULL,"
     +"\n    website_url VARCHAR(255)"
     +"\n );",
@@ -85,6 +85,6 @@ tableQueries = [
 ]
 
 
-for table in tableQueries:
-    print(table)
-    db.engine.execute(text(table))
+# for table in tableQueries:
+#     print(table)
+#     db.engine.execute(text(table))
