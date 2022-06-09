@@ -9,7 +9,7 @@ import re
 class Ui_MainWindow(object):
 
     def __init__(self):
-        self.baseQuery = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher on Publisher.id=publisher_id"
+        self.baseQuery = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher ON Publisher.id=publisher_id"
         self.filteredQuery = None 
         self.allBooks = list(db.engine.execute(text(self.baseQuery)))
         self.books = self.allBooks
@@ -21,7 +21,7 @@ class Ui_MainWindow(object):
     
 
     def fillBooks(self):
-
+        
         self.buttons = []
         self.objects = []
         self.pictures = []
@@ -191,14 +191,19 @@ class Ui_MainWindow(object):
         if not '' in inputDict.values():
 
             query = f"SELECT id FROM Book WHERE name='{inputDict['name']}'"
-            result1 = list(db.engine.execute(text(query)))
+            matchedIds = list(db.engine.execute(text(query)))
             query = f"SELECT id FROM Publisher WHERE name='{inputDict['publisher']}'"
             publisher_id = list(db.engine.execute(text(query)))[0][0]
 
-            if result1:
-                query = f"SELECT EXISTS(SELECT * FROM book_publisher WHERE book_id={result1[0][0]} and publisher_id={publisher_id})"
-                result = list(db.engine.execute(query))[0][0]
-                bookExists = False if result == 0 else True
+            if matchedIds:
+                for mid in matchedIds:                    
+                    query = f"SELECT EXISTS(SELECT * FROM book_publisher WHERE book_id={mid[0]} and publisher_id={publisher_id})"
+                    result = list(db.engine.execute(query))[0][0]
+                    if result == 0:
+                        bookExists = False
+                    else:
+                        bookExists = True
+                        break
             else:
                 bookExists = False
 
@@ -218,10 +223,11 @@ class Ui_MainWindow(object):
                     x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
                     url = url[x.start() : x.end()][::-1]
                     shutil.copy(inputDict['image_url'], 'online-book-store\pictures')
+                    url = 'url'
 
                     query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', 'pictures{url}', {inputDict['price']}, '{inputDict['description']}')"
                     db.engine.execute(text(query))
-                    query = f"SELECT id FROM Book WHERE name='{inputDict['name']}'"
+                    query = f"SELECT id FROM Book WHERE name='{inputDict['name']}' ORDER BY date_added DESC LIMIT 1"
                     insertedBook_id = list(db.engine.execute(text(query)))[0][0]
                     query = f"INSERT INTO book_publisher(book_id, publisher_id, quantity) VALUES({insertedBook_id}, {publisher_id}, {inputDict['quantity']})"
                     db.engine.execute(text(query))
@@ -233,6 +239,12 @@ class Ui_MainWindow(object):
                             query = f"INSERT INTO book_category(book_id, category_id) VALUES({insertedBook_id}, {category_id})"
                             db.engine.execute(text(query))
 
+                    
+                    self.books = list(db.engine.execute(text(self.baseQuery)))
+                    self.removeBooks()
+                    self.fillBooks()
+                    self.retranslateUi(MainWindow)
+
                 except:
                     print('something where wrong while uploading photo!')
 
@@ -242,8 +254,35 @@ class Ui_MainWindow(object):
 
 
     def getPicture(self):
-        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'book photo', '', '*.jpg')
+        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Book Photo', '', '*.jpg')
         self.input_addbook_picture.setText(url)
+
+
+    def fillUsers(self):
+        objects = []
+        updateButtons = []
+        deleteButtons = []
+        x=10
+        y=10
+        query = f"SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
+        users = list(db.engine.execute(text(query)))
+
+        print(users)
+        for index, item in enumerate(users):
+                
+            # self.gridLayout_9 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_user_main)
+            # self.gridLayout_9.setObjectName("gridLayout_9")
+
+
+            objects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main))
+            objects[index].setMinimumSize(QtCore.QSize(839, 65))
+            objects[index].setMaximumSize(QtCore.QSize(839, 65))
+            objects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            objects[index].setFrameShadow(QtWidgets.QFrame.Raised)
+            objects[index].setObjectName("frame_user_" + str(index))
+           
+
+            
         
 
     # layout functions
@@ -575,20 +614,27 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents_user_main = QtWidgets.QWidget()
         self.scrollAreaWidgetContents_user_main.setGeometry(QtCore.QRect(0, 0, 869, 459))
         self.scrollAreaWidgetContents_user_main.setObjectName("scrollAreaWidgetContents_user_main")
+      
+
         self.gridLayout_9 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_user_main)
         self.gridLayout_9.setObjectName("gridLayout_9")
+
+        
         self.frame_user_0 = QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main)
         self.frame_user_0.setMinimumSize(QtCore.QSize(839, 65))
         self.frame_user_0.setMaximumSize(QtCore.QSize(839, 65))
         self.frame_user_0.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_user_0.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_user_0.setObjectName("frame_user_0")
+
         self.gridLayoutWidget_5 = QtWidgets.QWidget(self.frame_user_0)
         self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 10, 821, 52))
         self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
+
         self.gridLayout_user_0 = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
         self.gridLayout_user_0.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_user_0.setObjectName("gridLayout_user_0")
+
         self.btn_user_update_0 = QtWidgets.QPushButton(self.gridLayoutWidget_5)
         self.btn_user_update_0.setMaximumSize(QtCore.QSize(55, 16777215))
         self.btn_user_update_0.setObjectName("btn_user_update_0")
@@ -627,7 +673,12 @@ class Ui_MainWindow(object):
         self.label_user_name_0.setMaximumSize(QtCore.QSize(83, 50))
         self.label_user_name_0.setObjectName("label_user_name_0")
         self.gridLayout_user_0.addWidget(self.label_user_name_0, 0, 0, 1, 1)
+        
         self.gridLayout_9.addWidget(self.frame_user_0, 1, 0, 1, 1, QtCore.Qt.AlignTop)
+        self.label_user_phone_0.setText("11111111111")
+        
+
+
         self.frame_user_header = QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main)
         self.frame_user_header.setEnabled(True)
         self.frame_user_header.setMinimumSize(QtCore.QSize(839, 65))
@@ -698,6 +749,8 @@ class Ui_MainWindow(object):
         self.btn_user_show = QtWidgets.QPushButton(self.frame_user_main)
         self.btn_user_show.setGeometry(QtCore.QRect(260, 20, 80, 24))
         self.btn_user_show.setObjectName("btn_user_show")
+
+        
         self.gridLayout_8.addWidget(self.frame_user_main, 0, 0, 1, 1)
         self.tabWidget.addTab(self.users, "")
         self.orders = QtWidgets.QWidget()
@@ -904,14 +957,14 @@ class Ui_MainWindow(object):
         self.label_addbook_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; font-weight:600;\">add books</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.add), _translate("MainWindow", "Add Book"))
         self.btn_user_search.setText(_translate("MainWindow", "Search"))
-        self.btn_user_update_0.setText(_translate("MainWindow", "Update"))
-        self.label_user_address_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">iran ,tehran mumuim hjmjm jm jm </p></body></html>"))
-        self.btn_user_delete_0.setText(_translate("MainWindow", "Delete"))
-        self.label_user_lastname_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Noroozi</p></body></html>"))
-        self.label_user_isadmin_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Yes</p></body></html>"))
-        self.label_user_phone_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">091245896</p></body></html>"))
-        self.label_user_username_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Norouzy</p></body></html>"))
-        self.label_user_name_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Mohamad</p></body></html>"))
+        # self.btn_user_update_0.setText(_translate("MainWindow", "Update"))
+        # self.label_user_address_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">iran ,tehran mumuim hjmjm jm jm </p></body></html>"))
+        # self.btn_user_delete_0.setText(_translate("MainWindow", "Delete"))
+        # self.label_user_lastname_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Noroozi</p></body></html>"))
+        # self.label_user_isadmin_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Yes</p></body></html>"))
+        # self.label_user_phone_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">091245896</p></body></html>"))
+        # self.label_user_username_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Norouzy</p></body></html>"))
+        # self.label_user_name_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Mohamad</p></body></html>"))
         self.label_user_phone.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Phone</span></p></body></html>"))
         self.label_user_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">name</span></p></body></html>"))
         self.label_user_delete.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Delete</span></p></body></html>"))
