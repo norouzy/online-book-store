@@ -1,3 +1,4 @@
+from turtle import title
 from PyQt5 import QtCore, QtWidgets
 from tables import db
 from sqlalchemy import text
@@ -223,7 +224,6 @@ class Ui_MainWindow(object):
                     x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
                     url = url[x.start() : x.end()][::-1]
                     shutil.copy(inputDict['image_url'], 'online-book-store\pictures')
-                    url = 'url'
 
                     query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', 'pictures{url}', {inputDict['price']}, '{inputDict['description']}')"
                     db.engine.execute(text(query))
@@ -283,7 +283,47 @@ class Ui_MainWindow(object):
            
 
             
-        
+    def fillInventory(self):
+        objects = []
+        titles = [
+            'Total Number Of Books ',
+            'Number Of Sold Books ',
+            'Total Books Price ',
+            'Total Sold Books Price ',
+            'Total Sold Books Price(last 7 days) ',
+            'Total Sold Books Price(last 30 days) '
+        ]
+        queries = [
+            "SELECT SUM(book_publisher.quantity) FROM Book JOIN book_publisher ON Book.id=book_publisher.book_id",
+            "SELECT SUM(quantity) FROM book_order",
+            "SELECT SUM(price) FROM Book",
+            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id",
+            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id WHERE book_order.date_added>=(SELECT DATETIME('now', '-7 day'))",
+            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id WHERE book_order.date_added>=(SELECT DATETIME('now', '-30 day'))"
+        ]
+
+        for index in range(0, 6):
+
+            objects.append(QtWidgets.QFrame(self.verticalLayoutWidget))
+            objects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            objects[index].setFrameShadow(QtWidgets.QFrame.Raised)
+            objects[index].setObjectName("frame_inventory")
+
+            self.label_inventory_title_0 = QtWidgets.QLabel(objects[index])
+            self.label_inventory_title_0.setGeometry(QtCore.QRect(20, 10, 200, 41))
+            self.label_inventory_title_0.setObjectName("label_inventory_title")
+
+            self.label_inventory_0 = QtWidgets.QLabel(objects[index])
+            self.label_inventory_0.setGeometry(QtCore.QRect(250, 10, 180, 40))
+            self.label_inventory_0.setObjectName("label_inventory_0")
+
+            self.verticalLayout_inventory_main.addWidget(objects[index]) 
+
+            qResult = list(db.engine.execute(queries[index]))[0][0]
+
+            self.label_inventory_title_0.setText(titles[index])  
+            self.label_inventory_0.setText(str(qResult))
+   
 
     # layout functions
     def setupUi(self, MainWindow):
@@ -821,72 +861,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_inventory_main = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout_inventory_main.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_inventory_main.setObjectName("verticalLayout_inventory_main")
-        self.frame_inventory_0 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_0.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_0.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_0.setObjectName("frame_inventory_0")
-        self.label_inventory_title_0 = QtWidgets.QLabel(self.frame_inventory_0)
-        self.label_inventory_title_0.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_0.setObjectName("label_inventory_title_0")
-        self.label_inventory_0 = QtWidgets.QLabel(self.frame_inventory_0)
-        self.label_inventory_0.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_0.setObjectName("label_inventory_0")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_0)
-        self.frame_inventory_1 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_1.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_1.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_1.setObjectName("frame_inventory_1")
-        self.label_inventory_title_1 = QtWidgets.QLabel(self.frame_inventory_1)
-        self.label_inventory_title_1.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_1.setObjectName("label_inventory_title_1")
-        self.label_inventory_1 = QtWidgets.QLabel(self.frame_inventory_1)
-        self.label_inventory_1.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_1.setObjectName("label_inventory_1")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_1)
-        self.frame_inventory_2 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_2.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_2.setObjectName("frame_inventory_2")
-        self.label_inventory_title_2 = QtWidgets.QLabel(self.frame_inventory_2)
-        self.label_inventory_title_2.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_2.setObjectName("label_inventory_title_2")
-        self.label_inventory_2 = QtWidgets.QLabel(self.frame_inventory_2)
-        self.label_inventory_2.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_2.setObjectName("label_inventory_2")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_2)
-        self.frame_inventory_3 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_3.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_3.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_3.setObjectName("frame_inventory_3")
-        self.label_inventory_title_3 = QtWidgets.QLabel(self.frame_inventory_3)
-        self.label_inventory_title_3.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_3.setObjectName("label_inventory_title_3")
-        self.label_inventory_3 = QtWidgets.QLabel(self.frame_inventory_3)
-        self.label_inventory_3.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_3.setObjectName("label_inventory_3")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_3)
-        self.frame_inventory_4 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_4.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_4.setObjectName("frame_inventory_4")
-        self.label_inventory_title_4 = QtWidgets.QLabel(self.frame_inventory_4)
-        self.label_inventory_title_4.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_4.setObjectName("label_inventory_title_4")
-        self.label_inventory_4 = QtWidgets.QLabel(self.frame_inventory_4)
-        self.label_inventory_4.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_4.setObjectName("label_inventory_4")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_4)
-        self.frame_inventory_5 = QtWidgets.QFrame(self.verticalLayoutWidget)
-        self.frame_inventory_5.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_inventory_5.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_inventory_5.setObjectName("frame_inventory_5")
-        self.label_inventory_title_5 = QtWidgets.QLabel(self.frame_inventory_5)
-        self.label_inventory_title_5.setGeometry(QtCore.QRect(20, 10, 200, 41))
-        self.label_inventory_title_5.setObjectName("label_inventory_title_5")
-        self.label_inventory_5 = QtWidgets.QLabel(self.frame_inventory_5)
-        self.label_inventory_5.setGeometry(QtCore.QRect(250, 10, 180, 40))
-        self.label_inventory_5.setObjectName("label_inventory_5")
-        self.verticalLayout_inventory_main.addWidget(self.frame_inventory_5)
+
+        # inventory tab data fill
+        self.fillInventory()
+      
         self.scrollArea_inventory_main.setWidget(self.scrollAreaWidgetContents_inventory)
         self.label_inventory_title = QtWidgets.QLabel(self.inventory)
         self.label_inventory_title.setGeometry(QtCore.QRect(340, 30, 231, 41))
@@ -1018,18 +996,18 @@ class Ui_MainWindow(object):
         self.tableWidget_order.setSortingEnabled(__sortingEnabled)
         self.label_order_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">All Orders</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.orders), _translate("MainWindow", "Orders"))
-        self.label_inventory_title_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Books Total Quantity :</span></p></body></html>"))
-        self.label_inventory_0.setText(_translate("MainWindow", "12"))
-        self.label_inventory_title_1.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Sold Books Quantity :</span></p></body></html>"))
-        self.label_inventory_1.setText(_translate("MainWindow", "3"))
-        self.label_inventory_title_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total prices of books sold :</span></p></body></html>"))
-        self.label_inventory_2.setText(_translate("MainWindow", "18000"))
-        self.label_inventory_title_3.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Most books sold :</span></p></body></html>"))
-        self.label_inventory_3.setText(_translate("MainWindow", "harry"))
-        self.label_inventory_title_4.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">The least sold book :</span></p></body></html>"))
-        self.label_inventory_4.setText(_translate("MainWindow", "perspolice"))
-        self.label_inventory_title_5.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">The user who bought the most :</span></p></body></html>"))
-        self.label_inventory_5.setText(_translate("MainWindow", "norouzy"))
+        # self.label_inventory_title_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Number Of Books :</span></p></body></html>"))
+        # # self.label_inventory_0.setText(_translate("MainWindow", "12"))
+        # self.label_inventory_title_1.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Number Of Sold Books :</span></p></body></html>"))
+        # # self.label_inventory_1.setText(_translate("MainWindow", "3"))
+        # self.label_inventory_title_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Books Price :</span></p></body></html>"))
+        # # self.label_inventory_2.setText(_translate("MainWindow", "18000"))
+        # self.label_inventory_title_3.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price :</span></p></body></html>"))
+        # # self.label_inventory_3.setText(_translate("MainWindow", "harry"))
+        # self.label_inventory_title_4.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price(last 7 days) :</span></p></body></html>"))
+        # # self.label_inventory_4.setText(_translate("MainWindow", "perspolice"))
+        # self.label_inventory_title_5.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price(last 30 days) :</span></p></body></html>"))
+        # self.label_inventory_5.setText(_translate("MainWindow", "norouzy"))
         self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
         self.btn_logout.setText(_translate("MainWindow", "Log out"))
