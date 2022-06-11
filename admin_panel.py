@@ -15,6 +15,7 @@ class Ui_MainWindow(object):
         self.allBooks = list(db.engine.execute(text(self.baseQuery)))
         self.books = self.allBooks
         self.objects = None
+        self.userObjects = []
         self.pictures = None
         self.buttons = None
         self.filterOptions = []
@@ -259,31 +260,127 @@ class Ui_MainWindow(object):
 
 
     def fillUsers(self):
-        objects = []
-        updateButtons = []
-        deleteButtons = []
-        x=10
-        y=10
-        query = f"SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
+
+        query = "SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
         users = list(db.engine.execute(text(query)))
 
-        print(users)
-        for index, item in enumerate(users):
-                
-            # self.gridLayout_9 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_user_main)
-            # self.gridLayout_9.setObjectName("gridLayout_9")
+        self.userObjects = []
+        deleteButtons = []
+        updateButtons = []
+    
+        for index, item in enumerate(users):   
+
+            self.userObjects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main))
+            self.userObjects[index].setMinimumSize(QtCore.QSize(839, 65))   
+            self.userObjects[index].setMaximumSize(QtCore.QSize(839, 65)) 
+            self.userObjects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.userObjects[index].setFrameShadow(QtWidgets.QFrame.Raised)  
+            self.userObjects[index].setObjectName("frame_user_" + str(index))
+
+            self.gridLayoutWidget_5 = QtWidgets.QWidget(self.userObjects[index])
+            self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 10, 821, 52))
+            self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
+
+            self.gridLayout_user_0 = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
+            self.gridLayout_user_0.setContentsMargins(0, 0, 0, 0)
+            self.gridLayout_user_0.setObjectName("gridLayout_user_0")
+
+            updateButtons.append(QtWidgets.QPushButton(self.gridLayoutWidget_5))
+            updateButtons[index].setMaximumSize(QtCore.QSize(55, 16777215))
+            deleteButtons.append(QtWidgets.QPushButton(self.gridLayoutWidget_5))
+            deleteButtons[index].setMaximumSize(QtCore.QSize(55, 16777215))
+            
+            self.gridLayout_user_0.addWidget(updateButtons[index], 0, 6, 1, 1)
+            self.label_user_address_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_address_0.setMinimumSize(QtCore.QSize(100, 0))
+            self.label_user_address_0.setMaximumSize(QtCore.QSize(150, 50))
+            self.label_user_address_0.setObjectName("label_user_address_0")
+            self.gridLayout_user_0.addWidget(self.label_user_address_0, 0, 4, 1, 1)
+            self.gridLayout_user_0.addWidget(deleteButtons[index], 0, 7, 1, 1)
+            self.label_user_lastname_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_lastname_0.setMinimumSize(QtCore.QSize(83, 50))
+            self.label_user_lastname_0.setMaximumSize(QtCore.QSize(83, 50))
+            self.label_user_lastname_0.setObjectName("label_user_lastname_0")
+            self.gridLayout_user_0.addWidget(self.label_user_lastname_0, 0, 1, 1, 1)
+            self.label_user_isadmin_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_isadmin_0.setMinimumSize(QtCore.QSize(55, 50))
+            self.label_user_isadmin_0.setMaximumSize(QtCore.QSize(55, 50))
+            self.label_user_isadmin_0.setObjectName("label_user_isadmin_0")
+            self.gridLayout_user_0.addWidget(self.label_user_isadmin_0, 0, 5, 1, 1)
+            self.label_user_phone_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_phone_0.setMinimumSize(QtCore.QSize(83, 50))
+            self.label_user_phone_0.setMaximumSize(QtCore.QSize(83, 50))
+            self.label_user_phone_0.setObjectName("label_user_phone_0")
+            self.gridLayout_user_0.addWidget(self.label_user_phone_0, 0, 3, 1, 1)
+            self.label_user_username_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_username_0.setMinimumSize(QtCore.QSize(83, 50))
+            self.label_user_username_0.setMaximumSize(QtCore.QSize(83, 50))
+            self.label_user_username_0.setObjectName("label_user_username_0")
+            self.gridLayout_user_0.addWidget(self.label_user_username_0, 0, 2, 1, 1)
+            self.label_user_name_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+            self.label_user_name_0.setMinimumSize(QtCore.QSize(83, 50))
+            self.label_user_name_0.setMaximumSize(QtCore.QSize(83, 50))
+            self.label_user_name_0.setObjectName("label_user_name_0")
+            self.gridLayout_user_0.addWidget(self.label_user_name_0, 0, 0, 1, 1)
+            
+            self.gridLayout_9.addWidget(self.userObjects[index], index+1 , 0, 1, 1, QtCore.Qt.AlignTop)
+            
+            self.label_user_phone_0.setText(item[7])
+            self.label_user_lastname_0.setText(item[6])
+            self.label_user_name_0.setText(item[5])
+            self.label_user_username_0.setText(item[1])
+            self.label_user_address_0.setText(item[8])         
+            deleteButtons[index].setText("Delete")
+            
+            if item[3] == 1:
+                self.label_user_isadmin_0.setText('yes')
+                updateButtons[index].setText('Demote')
+                updateButtons[index].setObjectName("demote_" + str(item[0]))
+            else:
+                self.label_user_isadmin_0.setText('no')
+                updateButtons[index].setText('Promote')
+                updateButtons[index].setObjectName("promote_" + str(item[0]))
+
+            deleteButtons[index].setObjectName('delete_' + str(item[0]))
+
+            updateButtons[index].clicked.connect(lambda ch, index=index: 
+                        self.updateUser(updateButtons[index].objectName().split('_')[0], updateButtons[index].objectName().split('_')[1]))
+            deleteButtons[index].clicked.connect(lambda ch, index=index:
+                        self.deleteUser(updateButtons[index].objectName().split('_')[1]))
 
 
-            objects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main))
-            objects[index].setMinimumSize(QtCore.QSize(839, 65))
-            objects[index].setMaximumSize(QtCore.QSize(839, 65))
-            objects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
-            objects[index].setFrameShadow(QtWidgets.QFrame.Raised)
-            objects[index].setObjectName("frame_user_" + str(index))
-           
+    def removeUsers(self):
+        for obj in self.userObjects:
+            obj.deleteLater()
+
+            
+    def deleteUser(self, id):     
+
+        queries = [
+            f"DELETE FROM User WHERE id={id}",
+            f"DELETE FROM Customer WHERE user_id={id}"
+        ]
+
+        for query in queries:
+            db.engine.execute(text(query))
+
+        self.removeUsers()
+        self.fillUsers()
+
+
+    def updateUser(self, action, id):
+
+        is_admin = 1 if action == 'promote' else 0
+        
+        query = f"UPDATE User SET is_admin={is_admin} WHERE id={id}"
+        db.engine.execute(text(query))
+
+        self.removeUsers()
+        self.fillUsers()
 
             
     def fillInventory(self):
+        
         objects = []
         titles = [
             'Total Number Of Books ',
@@ -547,8 +644,7 @@ class Ui_MainWindow(object):
         self.gridLayout_addbook_main.addWidget(self.input_publisher_name_2, 0, 1, 1, 1)
         self.input_publisher_author = QtWidgets.QLineEdit(self.add)
         self.input_publisher_author.setObjectName("input_publisher_author")
-        self.gridLayout_addbook_main.addWidget(self.input_publisher_author, 1, 1, 1, 1)
-       
+        self.gridLayout_addbook_main.addWidget(self.input_publisher_author, 1, 1, 1, 1)      
         self.label_addbook_description = QtWidgets.QLabel(self.add)
         self.label_addbook_description.setObjectName("label_addbook_description")
         self.gridLayout_addbook_main.addWidget(self.label_addbook_description, 4, 0, 1, 1)
@@ -561,10 +657,10 @@ class Ui_MainWindow(object):
         # self.select_addbook_publisher.addItem("")
         result = list(db.engine.execute(text("SELECT name FROM Publisher")))
         publishers = [res[0] for res in result]
+
         
         self.select_addbook_publisher.addItems(publishers)
         self.gridLayout_addbook_main.addWidget(self.select_addbook_publisher, 5, 1, 1, 1)
-
         self.input_publisher_quantity = QtWidgets.QLineEdit(self.add)
         self.input_publisher_quantity.setObjectName("input_publisher_quantity")
         self.gridLayout_addbook_main.addWidget(self.input_publisher_quantity, 3, 1, 1, 1)
@@ -625,8 +721,7 @@ class Ui_MainWindow(object):
         self.input_addbook_picture = QtWidgets.QLineEdit(self.frame_addbook_picture)
         self.input_addbook_picture.setGeometry(QtCore.QRect(0, 10, 500, 21))
         self.input_addbook_picture.setMinimumSize(QtCore.QSize(500, 0))
-        self.input_addbook_picture.setObjectName("input_addbook_picture")
-        
+        self.input_addbook_picture.setObjectName("input_addbook_picture")      
         self.gridLayout_addbook_main.addWidget(self.frame_addbook_picture, 7, 1, 1, 1)
         self.gridLayout_3.addLayout(self.gridLayout_addbook_main, 2, 0, 1, 1)
         self.label_addbook_title = QtWidgets.QLabel(self.add)
@@ -654,78 +749,11 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents_user_main = QtWidgets.QWidget()
         self.scrollAreaWidgetContents_user_main.setGeometry(QtCore.QRect(0, 0, 869, 459))
         self.scrollAreaWidgetContents_user_main.setObjectName("scrollAreaWidgetContents_user_main")
-      
-
         self.gridLayout_9 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_user_main)
         self.gridLayout_9.setObjectName("gridLayout_9")
 
-        for i in range(1,100):       
-            self.frame_user_0 = QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main)
-            self.frame_user_0.setMinimumSize(QtCore.QSize(839, 65))
-            self.frame_user_0.setMaximumSize(QtCore.QSize(839, 65))
-            self.frame_user_0.setFrameShape(QtWidgets.QFrame.StyledPanel)
-            self.frame_user_0.setFrameShadow(QtWidgets.QFrame.Raised)
-            self.frame_user_0.setObjectName("frame_user_0")
-
-            self.gridLayoutWidget_5 = QtWidgets.QWidget(self.frame_user_0)
-            self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 10, 821, 52))
-            self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
-
-            self.gridLayout_user_0 = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
-            self.gridLayout_user_0.setContentsMargins(0, 0, 0, 0)
-            self.gridLayout_user_0.setObjectName("gridLayout_user_0")
-
-            self.btn_user_update_0 = QtWidgets.QPushButton(self.gridLayoutWidget_5)
-            self.btn_user_update_0.setMaximumSize(QtCore.QSize(55, 16777215))
-            self.btn_user_update_0.setObjectName("btn_user_update_0")
-            self.gridLayout_user_0.addWidget(self.btn_user_update_0, 0, 6, 1, 1)
-            self.label_user_address_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_address_0.setMinimumSize(QtCore.QSize(100, 0))
-            self.label_user_address_0.setMaximumSize(QtCore.QSize(150, 50))
-            self.label_user_address_0.setObjectName("label_user_address_0")
-            self.gridLayout_user_0.addWidget(self.label_user_address_0, 0, 4, 1, 1)
-            self.btn_user_delete_0 = QtWidgets.QPushButton(self.gridLayoutWidget_5)
-            self.btn_user_delete_0.setMaximumSize(QtCore.QSize(55, 16777215))
-            self.btn_user_delete_0.setObjectName("btn_user_delete_0")
-            self.gridLayout_user_0.addWidget(self.btn_user_delete_0, 0, 7, 1, 1)
-            self.label_user_lastname_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_lastname_0.setMinimumSize(QtCore.QSize(83, 50))
-            self.label_user_lastname_0.setMaximumSize(QtCore.QSize(83, 50))
-            self.label_user_lastname_0.setObjectName("label_user_lastname_0")
-            self.gridLayout_user_0.addWidget(self.label_user_lastname_0, 0, 1, 1, 1)
-            self.label_user_isadmin_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_isadmin_0.setMinimumSize(QtCore.QSize(55, 50))
-            self.label_user_isadmin_0.setMaximumSize(QtCore.QSize(55, 50))
-            self.label_user_isadmin_0.setObjectName("label_user_isadmin_0")
-            self.gridLayout_user_0.addWidget(self.label_user_isadmin_0, 0, 5, 1, 1)
-            self.label_user_phone_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_phone_0.setMinimumSize(QtCore.QSize(83, 50))
-            self.label_user_phone_0.setMaximumSize(QtCore.QSize(83, 50))
-            self.label_user_phone_0.setObjectName("label_user_phone_0")
-            self.gridLayout_user_0.addWidget(self.label_user_phone_0, 0, 3, 1, 1)
-            self.label_user_username_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_username_0.setMinimumSize(QtCore.QSize(83, 50))
-            self.label_user_username_0.setMaximumSize(QtCore.QSize(83, 50))
-            self.label_user_username_0.setObjectName("label_user_username_0")
-            self.gridLayout_user_0.addWidget(self.label_user_username_0, 0, 2, 1, 1)
-            self.label_user_name_0 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-            self.label_user_name_0.setMinimumSize(QtCore.QSize(83, 50))
-            self.label_user_name_0.setMaximumSize(QtCore.QSize(83, 50))
-            self.label_user_name_0.setObjectName("label_user_name_0")
-            self.gridLayout_user_0.addWidget(self.label_user_name_0, 0, 0, 1, 1)
-            
-            self.gridLayout_9.addWidget(self.frame_user_0, i, 0, 1, 1, QtCore.Qt.AlignTop)
-            self.label_user_phone_0.setText("11111111111")
-            self.label_user_isadmin_0.setText("Yes")
-            self.label_user_lastname_0.setText("Noroozi")
-            self.label_user_name_0.setText("Mohamad")
-            self.label_user_username_0.setText("@norouzy")
-            self.label_user_address_0.setText("ewo;iwef nf;wejfoiwenf flkjweiofjiofj")
-            self.btn_user_update_0.setText("Update")
-            self.btn_user_delete_0.setText("Update")
-
-        
-
+        # fill users tab
+        self.fillUsers()
 
         self.frame_user_header = QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main)
         self.frame_user_header.setEnabled(True)
@@ -943,14 +971,7 @@ class Ui_MainWindow(object):
         self.label_addbook_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; font-weight:600;\">add books</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.add), _translate("MainWindow", "Add Book"))
         self.btn_user_search.setText(_translate("MainWindow", "Search"))
-        # self.btn_user_update_0.setText(_translate("MainWindow", "Update"))
-        # self.label_user_address_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">iran ,tehran mumuim hjmjm jm jm </p></body></html>"))
-        # self.btn_user_delete_0.setText(_translate("MainWindow", "Delete"))
-        # self.label_user_lastname_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Noroozi</p></body></html>"))
-        # self.label_user_isadmin_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Yes</p></body></html>"))
-        # self.label_user_phone_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">091245896</p></body></html>"))
-        # self.label_user_username_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Norouzy</p></body></html>"))
-        # self.label_user_name_0.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Mohamad</p></body></html>"))
+      
         self.label_user_phone.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Phone</span></p></body></html>"))
         self.label_user_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">name</span></p></body></html>"))
         self.label_user_delete.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Delete</span></p></body></html>"))
@@ -1004,18 +1025,7 @@ class Ui_MainWindow(object):
         self.tableWidget_order.setSortingEnabled(__sortingEnabled)
         self.label_order_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">All Orders</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.orders), _translate("MainWindow", "Orders"))
-        # self.label_inventory_title_0.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Number Of Books :</span></p></body></html>"))
-        # # self.label_inventory_0.setText(_translate("MainWindow", "12"))
-        # self.label_inventory_title_1.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Number Of Sold Books :</span></p></body></html>"))
-        # # self.label_inventory_1.setText(_translate("MainWindow", "3"))
-        # self.label_inventory_title_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Books Price :</span></p></body></html>"))
-        # # self.label_inventory_2.setText(_translate("MainWindow", "18000"))
-        # self.label_inventory_title_3.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price :</span></p></body></html>"))
-        # # self.label_inventory_3.setText(_translate("MainWindow", "harry"))
-        # self.label_inventory_title_4.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price(last 7 days) :</span></p></body></html>"))
-        # # self.label_inventory_4.setText(_translate("MainWindow", "perspolice"))
-        # self.label_inventory_title_5.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Total Sold Books Price(last 30 days) :</span></p></body></html>"))
-        # self.label_inventory_5.setText(_translate("MainWindow", "norouzy"))
+       
         self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
         self.btn_logout.setText(_translate("MainWindow", "Log out"))
