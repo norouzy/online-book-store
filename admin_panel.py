@@ -422,6 +422,37 @@ class Ui_MainWindow(object):
             self.label_inventory_0.setText(str(qResult))
    
 
+
+    def fillOrders(self):
+
+        query = "select Book.name, User.username, Publisher.name, book_order.date_added, book_order.quantity, Book.price"\
+        +"\n    from book_publisher"\
+        +"\n    join Book on book_publisher.book_id=Book.id"\
+        +"\n    join Publisher on Publisher.id=book_publisher.publisher_id"\
+        +"\n    join book_order on book_order.book_id=book.id and book_order.publisher_id=Publisher.id"\
+        +"\n    join Customer on customer.user_id=book_order.customer_id"\
+        +"\n    join User on User.id=Customer.user_id;"
+
+        orders = list(db.engine.execute(text(query)))
+
+        self.tableWidget_order.setRowCount(len(orders))
+
+        for row in range(0, len(orders)):
+
+            for col in range(0, 7):
+                
+                item = QtWidgets.QTableWidgetItem()
+                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.tableWidget_order.setItem(row, col, item)
+
+                totalPrice = orders[row][4] * orders[row][5]
+
+                if col == 6:
+                    item.setText(str(totalPrice))
+                else:
+                    item.setText(str(orders[row][col]))
+
+
     # layout functions
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -699,6 +730,7 @@ class Ui_MainWindow(object):
         self.gridLayout_addbook_main.addWidget(self.btn_addbook_submit, 8, 1, 1, 1)
         # add book button event listener
         self.btn_addbook_submit.clicked.connect(lambda: self.addBook())
+
         self.label_addbook_publisher = QtWidgets.QLabel(self.add)
         self.label_addbook_publisher.setObjectName("label_addbook_publisher")
         self.gridLayout_addbook_main.addWidget(self.label_addbook_publisher, 5, 0, 1, 1)
@@ -825,63 +857,31 @@ class Ui_MainWindow(object):
         self.btn_user_show = QtWidgets.QPushButton(self.frame_user_main)
         self.btn_user_show.setGeometry(QtCore.QRect(260, 20, 80, 24))
         self.btn_user_show.setObjectName("btn_user_show")
-
-        
+      
         self.gridLayout_8.addWidget(self.frame_user_main, 0, 0, 1, 1)
         self.tabWidget.addTab(self.users, "")
+
         self.orders = QtWidgets.QWidget()
         self.orders.setObjectName("orders")
         self.tableWidget_order = QtWidgets.QTableWidget(self.orders)
         self.tableWidget_order.setGeometry(QtCore.QRect(34, 50, 811, 481))
         self.tableWidget_order.setObjectName("tableWidget_order")
-        self.tableWidget_order.setColumnCount(8)
-        self.tableWidget_order.setRowCount(1)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setVerticalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(3, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(4, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(5, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(6, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.tableWidget_order.setHorizontalHeaderItem(7, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 0, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 1, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 2, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 3, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 4, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 5, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 6, item)
-        item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.tableWidget_order.setItem(0, 7, item)
+        self.tableWidget_order.setColumnCount(7)
+
+        columns = ['Book', 'User', 'Publisher', 'Date Added', 'Quantity', 'Price', 'Total']
+        for column in range(0, 7):
+            self.tableWidget_order.setHorizontalHeaderItem(column, QtWidgets.QTableWidgetItem())
+            item = self.tableWidget_order.horizontalHeaderItem(column)
+            item.setText(columns[column])
+
+        # fill Orders tab
+        self.fillOrders()
+
         self.label_order_title = QtWidgets.QLabel(self.orders)
         self.label_order_title.setGeometry(QtCore.QRect(320, 9, 181, 41))
         self.label_order_title.setObjectName("label_order_title")
         self.tabWidget.addTab(self.orders, "")
+
         self.inventory = QtWidgets.QWidget()
         self.inventory.setObjectName("inventory")
         self.scrollArea_inventory_main = QtWidgets.QScrollArea(self.inventory)
@@ -957,7 +957,6 @@ class Ui_MainWindow(object):
         self.label_addbook_author.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">author</span></p></body></html>"))
         # self.label_addbook_category.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">category</span></p></body></html>"))
         self.label_addbook_description.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">description</span></p><p align=\"center\"><br/></p></body></html>"))
-        # self.select_addbook_publisher.setItemText(0, _translate("MainWindow", "select"))
         
         # addbook categories checkboxes
         for bx in self.categoryBoxes:
@@ -986,42 +985,10 @@ class Ui_MainWindow(object):
         self.checkBox_user_da.setText(_translate("MainWindow", "Date Added"))
         self.btn_user_show.setText(_translate("MainWindow", "Show"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "Users"))
-        item = self.tableWidget_order.verticalHeaderItem(0)
-        item.setText(_translate("MainWindow", "1"))
-        item = self.tableWidget_order.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "id"))
-        item = self.tableWidget_order.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Book"))
-        item = self.tableWidget_order.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "User"))
-        item = self.tableWidget_order.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Publisher"))
-        item = self.tableWidget_order.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Date added"))
-        item = self.tableWidget_order.horizontalHeaderItem(5)
-        item.setText(_translate("MainWindow", "Quantity"))
-        item = self.tableWidget_order.horizontalHeaderItem(6)
-        item.setText(_translate("MainWindow", "Price"))
-        item = self.tableWidget_order.horizontalHeaderItem(7)
-        item.setText(_translate("MainWindow", "Total Price"))
+
         __sortingEnabled = self.tableWidget_order.isSortingEnabled()
         self.tableWidget_order.setSortingEnabled(False)
-        item = self.tableWidget_order.item(0, 0)
-        item.setText(_translate("MainWindow", "1"))
-        item = self.tableWidget_order.item(0, 1)
-        item.setText(_translate("MainWindow", "Harry"))
-        item = self.tableWidget_order.item(0, 2)
-        item.setText(_translate("MainWindow", "Nrouzy"))
-        item = self.tableWidget_order.item(0, 3)
-        item.setText(_translate("MainWindow", "tolo"))
-        item = self.tableWidget_order.item(0, 4)
-        item.setText(_translate("MainWindow", "12/03/9"))
-        item = self.tableWidget_order.item(0, 5)
-        item.setText(_translate("MainWindow", "2"))
-        item = self.tableWidget_order.item(0, 6)
-        item.setText(_translate("MainWindow", "1200"))
-        item = self.tableWidget_order.item(0, 7)
-        item.setText(_translate("MainWindow", "2400"))
+        
         self.tableWidget_order.setSortingEnabled(__sortingEnabled)
         self.label_order_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">All Orders</span></p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.orders), _translate("MainWindow", "Orders"))

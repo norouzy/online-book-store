@@ -56,10 +56,12 @@ tableQueries = [
    "CREATE TABLE book_order("
     +"\n    book_id INT,"
     +"\n    customer_id INT,"
+    +"\n    publisher_id INT,"
     +"\n    quantity INT NOT NULL,"
     +"\n    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
     +"\n    FOREIGN KEY(customer_id) REFERENCES Customer(id),"
     +"\n    FOREIGN KEY(book_id) REFERENCES Book(id),"
+    +"\n    FOREIGN KEY(publisher_id) REFERENCES Publisher(id),"
     +"\n    PRIMARY key(book_id, customer_id)"
     +"\n );",
 
