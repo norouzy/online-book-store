@@ -1,5 +1,5 @@
-from turtle import title
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QComboBox
 from tables import db
 from sqlalchemy import text
 from PyQt5.QtGui import QPixmap
@@ -10,31 +10,77 @@ import re
 class Ui_MainWindow(object):
 
     def __init__(self):
-        self.baseQuery = f"SELECT * FROM Book JOIN book_publisher ON book.id=book_publisher.book_id JOIN Publisher ON Publisher.id=publisher_id"
-        self.filteredQuery = None 
-        self.allBooks = list(db.engine.execute(text(self.baseQuery)))
-        self.books = self.allBooks
-        self.objects = None
+
+        self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, ifnull(book_order.quantity, 0) as ordcount"\
+                        +"\n    FROM book_publisher"\
+                        +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
+                        +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
+                        +"\n    LEFT JOIN book_order ON book_order.book_id=book.id and book_order.publisher_id=Publisher.id"\
+                        # +"\n    LEFT JOIN Customer ON customer.user_id=book_order.customer_id"\
+                        # +"\n    LEFT JOIN User ON User.id=Customer.user_id"\
+
+
+        self.bookSearch = None
+        self.bookObjects = None
         self.userObjects = []
         self.pictures = None
-        self.buttons = None
-        self.filterOptions = []
         self.categoryBoxes = []
-    
+        self.bookCatBoxes = []
 
-    def fillBooks(self):
-        
-        self.buttons = []
-        self.objects = []
+
+    def getPublishers(self):
+        query = "SELECT name FROM Publisher"
+        return [res[0] for res in list(db.engine.execute(text(query)))]
+
+
+    def placeCatBoxes(self, tab, x, y, w, h):
+
+        query = "SELECT name FROM category"
+        catResult = list(db.engine.execute(text(query)))
+
+        for index, cat in enumerate(catResult):    
+
+            if tab == 0:
+              
+                if index % 3 == 0:
+                    x += 111
+                    y = 18
+                elif index % 3 == 1:
+                    y = 43
+                else:
+                    y = 68
+                
+                self.bookCatBoxes.append(QtWidgets.QCheckBox(self.frame_list_main))
+                self.bookCatBoxes[index].setObjectName(cat[0])
+                self.bookCatBoxes[index].setGeometry(QtCore.QRect(x, y, w, h))
+            else:  
+                if index % 2 == 0:
+                    x += 100
+                    y = 2
+                else:
+                    y = 32 
+                self.categoryBoxes.append(QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main))
+                self.categoryBoxes[index].setObjectName(cat[0])           
+                self.categoryBoxes[index].setGeometry(QtCore.QRect(x, y, w, h))
+
+            
+
+    def fillBooks(self, query):
+        print(query)
+
+        buttons = []
+        self.bookObjects = []
         self.pictures = []
 
-        for index, item in enumerate(self.books):
-            self.objects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents))
-            self.objects[index].setMaximumSize(QtCore.QSize(485, 150))
-            self.objects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
-            self.objects[index].setFrameShadow(QtWidgets.QFrame.Raised)
-            self.objects[index].setObjectName("frame_list_" + str(index))
-            self.gridLayoutWidget = QtWidgets.QWidget(self.objects[index])
+        books = list(db.engine.execute(text(query)))
+
+        for index, item in enumerate(books):
+            self.bookObjects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents))
+            self.bookObjects[index].setMaximumSize(QtCore.QSize(485, 150))
+            self.bookObjects[index].setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.bookObjects[index].setFrameShadow(QtWidgets.QFrame.Raised)
+            self.bookObjects[index].setObjectName("frame_list_" + str(index))
+            self.gridLayoutWidget = QtWidgets.QWidget(self.bookObjects[index])
             self.gridLayoutWidget.setGeometry(QtCore.QRect(9, 9, 471, 136))
             self.gridLayoutWidget.setObjectName("gridLayoutWidget")
             self.gridLayout_list_0 = QtWidgets.QGridLayout(self.gridLayoutWidget)
@@ -56,27 +102,28 @@ class Ui_MainWindow(object):
             self.label_list_publisher_0.setObjectName("label_list_publisher_0")
             self.gridLayout_list_0.addWidget(self.label_list_publisher_0, 3, 0, 1, 1)
             # buttons creation + callback function
-            self.buttons.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-            self.buttons[index].setObjectName(str(item[0]))
-            self.gridLayout_list_0.addWidget(self.buttons[index], 6, 0, 1, 1)
-            self.buttons[index].clicked.connect(lambda ch, index=index: self.buyBook(self.buttons[index].objectName()))
+            buttons.append(QtWidgets.QPushButton(self.gridLayoutWidget))
+            buttons[index].setObjectName(str(item[0]))
+            self.gridLayout_list_0.addWidget(buttons[index], 6, 0, 1, 1)
+            buttons[index].clicked.connect(lambda ch, index=index: self.buyBook(buttons[index].objectName()))
+            buttons[index].setText("edit")
             # pic
-            self.gridLayout_5.addWidget(self.objects[index], index, 1, 1, 1)
+            self.gridLayout_5.addWidget(self.bookObjects[index], index, 1, 1, 1)
             self.pictures.append(QtWidgets.QGraphicsView(self.scrollAreaWidgetContents))
             self.pictures[index].setMinimumSize(QtCore.QSize(220, 150))
             self.pictures[index].setMaximumSize(QtCore.QSize(220, 150))
             self.pictures[index].setObjectName("list_picture_" + str(index))        
             self.gridLayout_5.addWidget(self.pictures[index], index, 0, 1, 1)
             # giving values
-            self.label_list_name_0.setText('book name: ' + item[1])
-            self.label_list_quantity_0.setText('number in stock: ' + str(item[9]))
+            self.label_list_name_0.setText('book name: ' + item[0])
+            self.label_list_quantity_0.setText('number in stock: ' + str(item[1]))
             self.label_list_author_0.setText('author: ' + item[2])
-            self.label_list_price_0.setText('price: ' + str(item[4]))
-            self.label_list_publisher_0.setText('publisher: ' + item[11])
+            self.label_list_price_0.setText('price: ' + str(item[3]))
+            self.label_list_publisher_0.setText('publisher: ' + item[4])
             
 
     def removeBooks(self):
-        for obj in self.objects:
+        for obj in self.bookObjects:
             obj.deleteLater()
 
         for pic in self.pictures:
@@ -87,21 +134,25 @@ class Ui_MainWindow(object):
         print(book_id)
 
 
-    def search(self, input):
+    def search(self, input):    
         if input:
-            self.filteredQuery = self.baseQuery + f" WHERE Book.name LIKE '%{input}%' OR Book.author LIKE '%{input}%' OR Publisher.name LIKE '%{input}%'" 
-            self.books = db.engine.execute(text(self.filteredQuery))
+            self.input_list_search.setText(input)
+            self.bookSearch = f"Book.name LIKE '%{input}%' OR Book.author LIKE '%{input}%' OR Publisher.name LIKE '%{input}%'" 
             self.removeBooks()
+            self.fillBooks(self.baseQuery + f"\n WHERE " +  self.bookSearch)
+            self.reloadFilters()
             
         else:
-            self.filteredQuery = None
-            self.books = self.allBooks
+            self.input_list_search.setText('')
+            self.bookSearch = None
+            self.removeBooks()
+            self.fillBooks(self.baseQuery)
+            self.setupUi(MainWindow)   
 
 
-        self.filterOptions = []
-        self.setupUi(MainWindow)
-
-    
+        # self.setupUi(MainWindow)
+        
+ 
     def checkBoxFilter(self, filterObj):
         checkBoxes = [ 
             self.checkBox_list_mostExpensive,
@@ -129,25 +180,81 @@ class Ui_MainWindow(object):
                     checkBoxes[index + 1].setEnabled(True)
                 else:
                     checkBoxes[index - 1].setEnabled(True) 
+
+
+
+    def bookFilter(self):
+
+        selectedCategories = []
+
+        for cat in self.bookCatBoxes:
+            if cat.isChecked():
+                selectedCategories.append(cat.objectName())
+
+        selectedFilter = self.bookCombo.currentText()
+        selectedPublisher = self.pubCombo1.currentText()
+
+        donothing = False
+
+        if selectedCategories:
+
+            convertedList = f"('{selectedCategories[0]}')" if len(selectedCategories) == 1 else tuple(selectedCategories)
+            
+            query = f"SELECT Book.name,book_publisher.quantity,Book.author,Book.price,Publisher.name,Category.name,ifnull(book_order.quantity, 0) as ordcount"\
+                    +"\n    FROM book_category"\
+                    +"\n    JOIN Book ON Book.id=book_category.book_id"\
+                    +"\n    JOIN Category ON Category.id=book_category.category_id"\
+                    +"\n    JOIN book_publisher ON book_publisher.book_id=Book.id"\
+                    +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
+                    +"\n    LEFT JOIN book_order ON book_order.book_id=book.id and book_order.publisher_id=Publisher.id"\
+                    +f"\n   WHERE Category.name IN {convertedList}"
+
+        else:
+            query = self.baseQuery
+            if selectedFilter == 'select filter' and selectedPublisher == 'select publisher':
+                donothing = True
+                if self.bookSearch:                  
+                    query = self.baseQuery + f"\n WHERE " +  self.bookSearch
+                else:
+                    query = self.baseQuery
                
 
-    def filter(self):
+        if not donothing:
+            if self.bookSearch:
+                query += f" AND ({self.bookSearch})"
+        
+            if selectedPublisher != 'select publisher':
+                if selectedCategories:
+                    query += f" AND Publisher.name='{selectedPublisher}'"
+                else:
+                    query += f"\n   WHERE Publisher.name='{selectedPublisher}'"
 
-        if self.filterOptions:
-            query = self.filteredQuery if self.filteredQuery else self.baseQuery
-            query += ' ORDER BY'
+            if selectedFilter != 'select filter':
+                if selectedFilter == 'most popular':
+                    query += "\n ORDER BY ordcount DESC"
+                elif selectedFilter == 'least popular':
+                    query += "\n ORDER BY ordcount"
+                elif selectedFilter == 'most expensive':
+                    query += "\n ORDER BY Book.price DESC"
+                elif selectedFilter == 'least expensive':
+                    query += "\n ORDER BY Book.price"
+                elif selectedFilter == 'newest':
+                    query += "\n ORDER BY Book.date_added DESC"
+                else:
+                    query += "\n ORDER BY Book.date_added"
+    
+        
+        self.removeBooks()
+        self.fillBooks(query)
 
-            for filter in self.filterOptions:
-                query = query + filter + ","
 
-            if query[-1] == ',':
-                query = query[:-1]
 
-            print(query)  
-            self.books = db.engine.execute(text(query))
-            self.removeBooks()
-            self.fillBooks() 
-            self.retranslateUi(MainWindow)
+    def reloadFilters(self):
+        self.bookCombo.setCurrentText('select filter')
+        self.pubCombo1.setCurrentText('select publisher')
+
+        for cat in self.bookCatBoxes:
+            cat.setChecked(False)
 
 
     def addPublisher(self):
@@ -174,6 +281,7 @@ class Ui_MainWindow(object):
         else:  
             query = f"INSERT INTO Publisher(name, phone_number, website_url) VALUES('{inputDict['name']}', '{inputDict['phone_number']}', '{inputDict['website_url']}')"
             db.engine.execute(text(query))
+            self.setupUi(MainWindow)           
             print('new publisher added!')
 
 
@@ -241,10 +349,8 @@ class Ui_MainWindow(object):
                             db.engine.execute(text(query))
 
                     
-                    self.books = list(db.engine.execute(text(self.baseQuery)))
                     self.removeBooks()
-                    self.fillBooks()
-                    self.retranslateUi(MainWindow)
+                    self.fillBooks(self.baseQuery)
 
                 except:
                     print('something where wrong while uploading photo!')
@@ -382,6 +488,7 @@ class Ui_MainWindow(object):
     def fillInventory(self):
         
         objects = []
+
         titles = [
             'Total Number Of Books ',
             'Number Of Sold Books ',
@@ -486,50 +593,38 @@ class Ui_MainWindow(object):
         self.gridLayout_5 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout_5.setObjectName("gridLayout_5")
         # fill books
-        self.fillBooks()
+        self.fillBooks(self.baseQuery)
     
         self.scrollArea_book_list.setWidget(self.scrollAreaWidgetContents)
         self.input_list_search = QtWidgets.QLineEdit(self.frame_list_main)
-        self.input_list_search.setGeometry(QtCore.QRect(480, 20, 281, 24))
+        self.input_list_search.setGeometry(QtCore.QRect(540, 20, 220, 24))
         self.input_list_search.setObjectName("input_list_search")
         self.btn_list_search = QtWidgets.QPushButton(self.frame_list_main)
-        self.btn_list_search.setGeometry(QtCore.QRect(390, 20, 80, 24))
+        self.btn_list_search.setGeometry(QtCore.QRect(450, 20, 80, 24))
         self.btn_list_search.setObjectName("btn_list_search")
         # search button event listener
         self.btn_list_search.clicked.connect(lambda: self.search(self.input_list_search.text()))   
-        # price filter
-        self.checkBox_list_mostExpensive = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_mostExpensive.setGeometry(QtCore.QRect(10, 10, 100, 22))
-        self.checkBox_list_mostExpensive.setObjectName(" Book.price DESC")
-        self.checkBox_list_leastExpensive = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_leastExpensive.setGeometry(QtCore.QRect(10, 40, 100, 22))
-        self.checkBox_list_leastExpensive.setObjectName(" Book.price")
-        self.checkBox_list_mostExpensive.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_mostExpensive))
-        self.checkBox_list_leastExpensive.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_leastExpensive))
-        # popularity filter    
-        self.checkBox_list_mostPopular = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_mostPopular.setGeometry(QtCore.QRect(120, 10, 83, 22))
-        self.checkBox_list_mostPopular.setObjectName(" checkBox_list_mostPopular")
-        self.checkBox_list_leastPopular = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_leastPopular.setGeometry(QtCore.QRect(120, 40, 83, 22))
-        self.checkBox_list_leastPopular.setObjectName(" checkBox_list_leastPopular")
-        self.checkBox_list_mostPopular.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_mostPopular))
-        self.checkBox_list_leastPopular.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_leastPopular))
-        # added date filter
-        self.checkBox_list_newest = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_newest.setGeometry(QtCore.QRect(220, 10, 87, 22))
-        self.checkBox_list_newest.setObjectName(" Book.date_added DESC")
-        self.checkBox_list_oldest = QtWidgets.QCheckBox(self.frame_list_main)
-        self.checkBox_list_oldest.setGeometry(QtCore.QRect(220, 40, 87, 22))
-        self.checkBox_list_oldest.setObjectName(" Book.date_added")
-        self.checkBox_list_newest.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_newest))
-        self.checkBox_list_oldest.stateChanged.connect(lambda: self.checkBoxFilter(self.checkBox_list_oldest))
+        # combo boxes
+        self.bookCombo = QtWidgets.QComboBox(self.frame_list_main)
+        self.bookCombo.setGeometry(QtCore.QRect(10, 20, 100, 20))
+        bookFilters = ['select filter', 'newest', 'oldest', 'most expensive', 'least expensive', 'most popular', 'least popular']
+        self.bookCombo.addItems(bookFilters)
+
+        self.pubCombo1 = QtWidgets.QComboBox(self.frame_list_main)
+        self.pubCombo1.setGeometry(QtCore.QRect(10, 45, 100, 20))
+        publishers = self.getPublishers()
+        self.pubCombo1.addItem("select publisher")
+        self.pubCombo1.addItems(publishers)
+
+        self.bookCatBoxes = []
+        self.placeCatBoxes(0, 20, 45, 80, 22)
+
              
         self.btn_list_show = QtWidgets.QPushButton(self.frame_list_main)
-        self.btn_list_show.setGeometry(QtCore.QRect(100, 70, 80, 24))
+        self.btn_list_show.setGeometry(QtCore.QRect(10, 70, 75, 24))
         self.btn_list_show.setObjectName("btn_list_show")
         # filter button event listener
-        self.btn_list_show.clicked.connect(lambda: self.filter())
+        self.btn_list_show.clicked.connect(lambda: self.bookFilter())
       
         self.gridLayout_6.addWidget(self.frame_list_main, 0, 0, 1, 1)
         self.tabWidget.addTab(self.list, "")
@@ -686,8 +781,7 @@ class Ui_MainWindow(object):
         self.select_addbook_publisher = QtWidgets.QComboBox(self.add)
         self.select_addbook_publisher.setObjectName("select_addbook_publisher")
         # self.select_addbook_publisher.addItem("")
-        result = list(db.engine.execute(text("SELECT name FROM Publisher")))
-        publishers = [res[0] for res in result]
+        # result = list(db.engine.execute(text("SELECT name FROM Publisher")))
 
         
         self.select_addbook_publisher.addItems(publishers)
@@ -703,21 +797,22 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents_addbook_main.setObjectName("scrollAreaWidgetContents_addbook_main")
         # categores selection
         self.categoryBoxes = []
-        x = 10
-        catResult = list(db.engine.execute(text("SELECT name FROM category")))
+        self.placeCatBoxes(1, 10, 2, 83, 22)
+        # x = 10
+        # catResult = list(db.engine.execute(text("SELECT name FROM category")))
 
-        for index, cat in enumerate(catResult):
+        # for index, cat in enumerate(catResult):
 
-            self.categoryBoxes.append(QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main))
-            self.categoryBoxes[index].setObjectName(cat[0])
+        #     self.categoryBoxes.append(QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main))
+        #     self.categoryBoxes[index].setObjectName(cat[0])
 
-            if index % 2 == 0:
-                x += 100
-                y = 2
-            else:
-                y = 32
+        #     if index % 2 == 0:
+        #         x += 100
+        #         y = 2
+        #     else:
+        #         y = 32
    
-            self.categoryBoxes[index].setGeometry(QtCore.QRect(x, y, 83, 22))
+        #     self.categoryBoxes[index].setGeometry(QtCore.QRect(x, y, 83, 22))
   
         
         self.scrollArea_addbook_category.setWidget(self.scrollAreaWidgetContents_addbook_main)
@@ -922,17 +1017,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-       
-        for btn in self.buttons:
-            btn.setText(_translate("MainWindow", "Buy"))
             
         self.btn_list_search.setText(_translate("MainWindow", "Search"))
-        self.checkBox_list_mostExpensive.setText(_translate("MainWindow", "Most Expensive"))
-        self.checkBox_list_leastExpensive.setText(_translate("MainWindow", "Least Expensive"))
-        self.checkBox_list_mostPopular.setText(_translate("MainWindow", "Most Popular"))
-        self.checkBox_list_leastPopular.setText(_translate("MainWindow", "Least Popular"))
-        self.checkBox_list_newest.setText(_translate("MainWindow", "Newest"))
-        self.checkBox_list_oldest.setText(_translate("MainWindow", "Oldest"))
         self.btn_list_show.setText(_translate("MainWindow", "filter"))
           
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.list), _translate("MainWindow", "Book List"))
@@ -958,9 +1044,10 @@ class Ui_MainWindow(object):
         # self.label_addbook_category.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">category</span></p></body></html>"))
         self.label_addbook_description.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">description</span></p><p align=\"center\"><br/></p></body></html>"))
         
-        # addbook categories checkboxes
-        for bx in self.categoryBoxes:
-            bx.setText(_translate("MainWindow", bx.objectName()))
+        for bx in range(0, len(self.categoryBoxes)):
+            objName = self.categoryBoxes[bx].objectName()
+            self.bookCatBoxes[bx].setText(_translate("MainWindow", objName))
+            self.categoryBoxes[bx].setText(_translate("MainWindow", objName))
 
         self.label_addbook_quantity.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">quantity</span></p></body></html>"))
         self.btn_addbook_submit.setText(_translate("MainWindow", "Submit"))
