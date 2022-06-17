@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QComboBox
 from tables import db
@@ -19,8 +20,16 @@ class Ui_MainWindow(object):
                         # +"\n    LEFT JOIN Customer ON customer.user_id=book_order.customer_id"\
                         # +"\n    LEFT JOIN User ON User.id=Customer.user_id"\
 
+        # self.userQuery = "SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
+        self.userQuery = "SELECT User.id, User.username, Customer.first_name, Customer.last_name, Customer.address, "\
+                        +"\n    Customer.phone_number, User.is_admin, ifnull(SUM(book_order.quantity), 0) AS total, User.date_joined"\
+                        +"\n    FROM User "\
+                        +"\n    JOIN Customer ON User.id=Customer.user_id"\
+                        +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
+                        +"\n    GROUP BY User.username"
 
         self.bookSearch = None
+        self.userSearch = None
         self.bookObjects = None
         self.userObjects = []
         self.pictures = None
@@ -365,10 +374,10 @@ class Ui_MainWindow(object):
         self.input_addbook_picture.setText(url)
 
 
-    def fillUsers(self):
-
-        query = "SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
+    def fillUsers(self, query):
+        print(query)
         users = list(db.engine.execute(text(query)))
+        
 
         self.userObjects = []
         deleteButtons = []
@@ -431,14 +440,14 @@ class Ui_MainWindow(object):
             
             self.gridLayout_9.addWidget(self.userObjects[index], index+1 , 0, 1, 1, QtCore.Qt.AlignTop)
             
-            self.label_user_phone_0.setText(item[7])
-            self.label_user_lastname_0.setText(item[6])
-            self.label_user_name_0.setText(item[5])
+            self.label_user_phone_0.setText(item[5])
+            self.label_user_lastname_0.setText(item[3])
+            self.label_user_name_0.setText(item[2])
             self.label_user_username_0.setText(item[1])
-            self.label_user_address_0.setText(item[8])         
+            self.label_user_address_0.setText(item[4])         
             deleteButtons[index].setText("Delete")
             
-            if item[3] == 1:
+            if item[6] == 1:
                 self.label_user_isadmin_0.setText('yes')
                 updateButtons[index].setText('Demote')
                 updateButtons[index].setObjectName("demote_" + str(item[0]))
@@ -453,6 +462,48 @@ class Ui_MainWindow(object):
                         self.updateUser(updateButtons[index].objectName().split('_')[0], updateButtons[index].objectName().split('_')[1]))
             deleteButtons[index].clicked.connect(lambda ch, index=index:
                         self.deleteUser(updateButtons[index].objectName().split('_')[1]))
+
+    def usersSearch(self, input):
+        if input:
+            self.input_user_search.setText(input)
+            self.userSearch = f"User.username LIKE '%{input}%' OR Customer.first_name LIKE '%{input}%' OR Customer.last_name LIKE '%{input}%'" 
+            self.removeUsers()
+            self.fillUsers(self.userQuery + f"\n HAVING " +  self.userSearch)
+            self.usersCombo.setCurrentText('select filter')
+            
+        else:
+            self.input_user_search.setText('')
+            self.userSearch = None
+            self.removeUsers()
+            self.fillUsers(self.userQuery)
+            # self.setupUi(MainWindow)  
+
+
+    def userFilter(self):
+        
+        selectedFilter = self.usersCombo.currentText()
+        query = self.userQuery
+
+        if self.userSearch:
+            q = query + "\n HAVING " +  self.userSearch
+        else:
+            q = query
+       
+        if selectedFilter != 'select filter':   
+            if selectedFilter == 'admin':
+                query = q + " AND User.is_admin=1" if q else "HAVING User.is_admin=1"                                        
+            elif selectedFilter == 'most loyal':
+                query = q + "\n ORDER BY Total DESC"
+            elif selectedFilter == 'least loyal':
+                query = q + "\n ORDER BY Total"
+            elif selectedFilter == 'newest':
+                query = q + "\n ORDER BY User.date_joined DESC"
+            else:
+                query = q + "\n ORDER BY User.date_joined"
+
+        self.removeUsers()
+        self.fillUsers(query)
+
 
 
     def removeUsers(self):
@@ -471,18 +522,18 @@ class Ui_MainWindow(object):
             db.engine.execute(text(query))
 
         self.removeUsers()
-        self.fillUsers()
+        self.fillUsers(self.userQuery)
 
 
     def updateUser(self, action, id):
-
+        print(id, action)
         is_admin = 1 if action == 'promote' else 0
         
         query = f"UPDATE User SET is_admin={is_admin} WHERE id={id}"
         db.engine.execute(text(query))
 
         self.removeUsers()
-        self.fillUsers()
+        self.fillUsers(self.userQuery)
 
             
     def fillInventory(self):
@@ -798,21 +849,6 @@ class Ui_MainWindow(object):
         # categores selection
         self.categoryBoxes = []
         self.placeCatBoxes(1, 10, 2, 83, 22)
-        # x = 10
-        # catResult = list(db.engine.execute(text("SELECT name FROM category")))
-
-        # for index, cat in enumerate(catResult):
-
-        #     self.categoryBoxes.append(QtWidgets.QCheckBox(self.scrollAreaWidgetContents_addbook_main))
-        #     self.categoryBoxes[index].setObjectName(cat[0])
-
-        #     if index % 2 == 0:
-        #         x += 100
-        #         y = 2
-        #     else:
-        #         y = 32
-   
-        #     self.categoryBoxes[index].setGeometry(QtCore.QRect(x, y, 83, 22))
   
         
         self.scrollArea_addbook_category.setWidget(self.scrollAreaWidgetContents_addbook_main)
@@ -864,11 +900,13 @@ class Ui_MainWindow(object):
         self.frame_user_main.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_user_main.setObjectName("frame_user_main")
         self.input_user_search = QtWidgets.QLineEdit(self.frame_user_main)
-        self.input_user_search.setGeometry(QtCore.QRect(480, 20, 281, 24))
+        self.input_user_search.setGeometry(QtCore.QRect(540, 20, 220, 24))
         self.input_user_search.setObjectName("input_user_search")
         self.btn_user_search = QtWidgets.QPushButton(self.frame_user_main)
-        self.btn_user_search.setGeometry(QtCore.QRect(770, 20, 80, 24))
+        self.btn_user_search.setGeometry(QtCore.QRect(450, 20, 80, 24))
         self.btn_user_search.setObjectName("btn_user_search")
+        # user search event handler
+        self.btn_user_search.clicked.connect(lambda: self.usersSearch(self.input_user_search.text()))   
         self.scrollArea_user = QtWidgets.QScrollArea(self.frame_user_main)
         self.scrollArea_user.setGeometry(QtCore.QRect(10, 70, 871, 461))
         self.scrollArea_user.setWidgetResizable(True)
@@ -880,7 +918,7 @@ class Ui_MainWindow(object):
         self.gridLayout_9.setObjectName("gridLayout_9")
 
         # fill users tab
-        self.fillUsers()
+        self.fillUsers(self.userQuery)
 
         self.frame_user_header = QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main)
         self.frame_user_header.setEnabled(True)
@@ -937,21 +975,18 @@ class Ui_MainWindow(object):
         self.gridLayout_user_header.addWidget(self.label_user_isadmin, 0, 5, 1, 1)
         self.gridLayout_9.addWidget(self.frame_user_header, 0, 0, 1, 1, QtCore.Qt.AlignTop)
         self.scrollArea_user.setWidget(self.scrollAreaWidgetContents_user_main)
-        self.checkBox_user_mb = QtWidgets.QCheckBox(self.frame_user_main)
-        self.checkBox_user_mb.setGeometry(QtCore.QRect(10, 10, 91, 22))
-        self.checkBox_user_mb.setObjectName("checkBox_user_mb")
-        self.checkBox_user_wb = QtWidgets.QCheckBox(self.frame_user_main)
-        self.checkBox_user_wb.setGeometry(QtCore.QRect(10, 40, 91, 22))
-        self.checkBox_user_wb.setObjectName("checkBox_user_wb")
-        self.checkBox_user_admin = QtWidgets.QCheckBox(self.frame_user_main)
-        self.checkBox_user_admin.setGeometry(QtCore.QRect(140, 10, 83, 22))
-        self.checkBox_user_admin.setObjectName("checkBox_user_admin")
-        self.checkBox_user_da = QtWidgets.QCheckBox(self.frame_user_main)
-        self.checkBox_user_da.setGeometry(QtCore.QRect(140, 40, 91, 22))
-        self.checkBox_user_da.setObjectName("checkBox_user_da")
+        
         self.btn_user_show = QtWidgets.QPushButton(self.frame_user_main)
-        self.btn_user_show.setGeometry(QtCore.QRect(260, 20, 80, 24))
+        self.btn_user_show.setGeometry(QtCore.QRect(150, 20, 75, 24))
         self.btn_user_show.setObjectName("btn_user_show")
+
+        userFilters = ['admin', 'newest', 'oldest', 'most loyal', 'least loyal']
+        self.usersCombo = QtWidgets.QComboBox(self.frame_user_main)
+        self.usersCombo.setGeometry(QtCore.QRect(20, 20, 100, 24))
+        self.usersCombo.addItem("select filter")
+        self.usersCombo.addItems(userFilters)
+        # filter button event listener
+        self.btn_user_show.clicked.connect(lambda: self.userFilter())
       
         self.gridLayout_8.addWidget(self.frame_user_main, 0, 0, 1, 1)
         self.tabWidget.addTab(self.users, "")
@@ -1066,11 +1101,11 @@ class Ui_MainWindow(object):
         self.label_user_update.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Update</span></p></body></html>"))
         self.label_user_address.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Address</span></p></body></html>"))
         self.label_user_isadmin.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Is Admin</span></p></body></html>"))
-        self.checkBox_user_mb.setText(_translate("MainWindow", "Most Buyer"))
-        self.checkBox_user_wb.setText(_translate("MainWindow", "Weak Buyer"))
-        self.checkBox_user_admin.setText(_translate("MainWindow", "admin"))
-        self.checkBox_user_da.setText(_translate("MainWindow", "Date Added"))
-        self.btn_user_show.setText(_translate("MainWindow", "Show"))
+        # self.checkBox_user_mb.setText(_translate("MainWindow", "Most Buyer"))
+        # self.checkBox_user_wb.setText(_translate("MainWindow", "Weak Buyer"))
+        # self.checkBox_user_admin.setText(_translate("MainWindow", "admin"))
+        # self.checkBox_user_da.setText(_translate("MainWindow", "Date Added"))
+        self.btn_user_show.setText(_translate("MainWindow", "filter"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "Users"))
 
         __sortingEnabled = self.tableWidget_order.isSortingEnabled()

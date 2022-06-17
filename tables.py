@@ -14,6 +14,7 @@ tableQueries = [
     +"\n    id INTEGER PRIMARY KEY AUTOINCREMENT,"
     +"\n    username VARCHAR(100) UNIQUE NOT NULL,"
     +"\n    password VARCHAR(150) NOT NULL,"
+    +"\n    date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
     +"\n    is_admin BOOLEAN DEFAULT FALSE"
     +"\n );",
 
