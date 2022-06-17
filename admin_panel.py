@@ -1,6 +1,4 @@
-from tkinter.messagebox import NO
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QComboBox
 from tables import db
 from sqlalchemy import text
 from PyQt5.QtGui import QPixmap
@@ -17,10 +15,8 @@ class Ui_MainWindow(object):
                         +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
                         +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
                         +"\n    LEFT JOIN book_order ON book_order.book_id=book.id and book_order.publisher_id=Publisher.id"\
-                        # +"\n    LEFT JOIN Customer ON customer.user_id=book_order.customer_id"\
-                        # +"\n    LEFT JOIN User ON User.id=Customer.user_id"\
+                       
 
-        # self.userQuery = "SELECT * FROM User JOIN Customer ON User.id=Customer.user_id"
         self.userQuery = "SELECT User.id, User.username, Customer.first_name, Customer.last_name, Customer.address, "\
                         +"\n    Customer.phone_number, User.is_admin, ifnull(SUM(book_order.quantity), 0) AS total, User.date_joined"\
                         +"\n    FROM User "\
@@ -377,7 +373,6 @@ class Ui_MainWindow(object):
     def fillUsers(self, query):
         print(query)
         users = list(db.engine.execute(text(query)))
-        
 
         self.userObjects = []
         deleteButtons = []
@@ -491,7 +486,7 @@ class Ui_MainWindow(object):
        
         if selectedFilter != 'select filter':   
             if selectedFilter == 'admin':
-                query = q + " AND User.is_admin=1" if q else "HAVING User.is_admin=1"                                        
+                query = q + " AND User.is_admin=1" if self.userSearch else q + "\n  HAVING User.is_admin=1"                                        
             elif selectedFilter == 'most loyal':
                 query = q + "\n ORDER BY Total DESC"
             elif selectedFilter == 'least loyal':
@@ -503,7 +498,6 @@ class Ui_MainWindow(object):
 
         self.removeUsers()
         self.fillUsers(query)
-
 
 
     def removeUsers(self):
@@ -669,7 +663,6 @@ class Ui_MainWindow(object):
 
         self.bookCatBoxes = []
         self.placeCatBoxes(0, 20, 45, 80, 22)
-
              
         self.btn_list_show = QtWidgets.QPushButton(self.frame_list_main)
         self.btn_list_show.setGeometry(QtCore.QRect(10, 70, 75, 24))
@@ -831,9 +824,6 @@ class Ui_MainWindow(object):
         # publisher selection
         self.select_addbook_publisher = QtWidgets.QComboBox(self.add)
         self.select_addbook_publisher.setObjectName("select_addbook_publisher")
-        # self.select_addbook_publisher.addItem("")
-        # result = list(db.engine.execute(text("SELECT name FROM Publisher")))
-
         
         self.select_addbook_publisher.addItems(publishers)
         self.gridLayout_addbook_main.addWidget(self.select_addbook_publisher, 5, 1, 1, 1)
@@ -1076,7 +1066,6 @@ class Ui_MainWindow(object):
         self.label_addbook_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">name</span></p></body></html>"))
         self.label_addbook_picture.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">Picture</span></p></body></html>"))
         self.label_addbook_author.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">author</span></p></body></html>"))
-        # self.label_addbook_category.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">category</span></p></body></html>"))
         self.label_addbook_description.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">description</span></p><p align=\"center\"><br/></p></body></html>"))
         
         for bx in range(0, len(self.categoryBoxes)):
@@ -1101,10 +1090,7 @@ class Ui_MainWindow(object):
         self.label_user_update.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Update</span></p></body></html>"))
         self.label_user_address.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Address</span></p></body></html>"))
         self.label_user_isadmin.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Is Admin</span></p></body></html>"))
-        # self.checkBox_user_mb.setText(_translate("MainWindow", "Most Buyer"))
-        # self.checkBox_user_wb.setText(_translate("MainWindow", "Weak Buyer"))
-        # self.checkBox_user_admin.setText(_translate("MainWindow", "admin"))
-        # self.checkBox_user_da.setText(_translate("MainWindow", "Date Added"))
+       
         self.btn_user_show.setText(_translate("MainWindow", "filter"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "Users"))
 
