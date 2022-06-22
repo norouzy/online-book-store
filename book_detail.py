@@ -10,11 +10,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(327, 674)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_BookDetailWindow(object):
+    def setupUi(self, BookDetailWindow):
+        BookDetailWindow.setObjectName("BookDetailWindow")
+        BookDetailWindow.resize(327, 674)
+        self.centralwidget = QtWidgets.QWidget(BookDetailWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.main_fram = QtWidgets.QFrame(self.centralwidget)
         self.main_fram.setGeometry(QtCore.QRect(20, 20, 301, 611))
@@ -136,43 +136,44 @@ class Ui_MainWindow(object):
         self.close_btn = QtWidgets.QPushButton(self.main_fram)
         self.close_btn.setGeometry(QtCore.QRect(100, 570, 80, 24))
         self.close_btn.setObjectName("close_btn")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        BookDetailWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(BookDetailWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 327, 21))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        BookDetailWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(BookDetailWindow)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        BookDetailWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(BookDetailWindow)
+        QtCore.QMetaObject.connectSlotsByName(BookDetailWindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, BookDetailWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.quantity_book_detail_title_label.setText(_translate("MainWindow", "quantity :"))
-        self.quantity_book_detail_label.setText(_translate("MainWindow", "12"))
-        self.description_book_detail_label.setText(_translate("MainWindow", "here write our description<br>and with <br>get next line"))
-        self.book_nam_detail_label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Harray pater</span></p></body></html>"))
-        self.price_book_detail_title_label.setText(_translate("MainWindow", "price :"))
-        self.price_book_detail_label.setText(_translate("MainWindow", "130000"))
-        self.date_book_detail_title_label.setText(_translate("MainWindow", "Time added :"))
-        self.date_book_detail_label.setText(_translate("MainWindow", "1378/08/9"))
-        self.author_book_detail_label.setText(_translate("MainWindow", "wison miler"))
-        self.author_book_detail_title_label.setText(_translate("MainWindow", "by : "))
-        self.publisher_book_detail_title_label.setText(_translate("MainWindow", "publisher:"))
-        self.publisher_book_detail_label.setText(_translate("MainWindow", "tolo"))
-        self.category_book_detail_title_label.setText(_translate("MainWindow", "category :"))
-        self.category_book_detail_label.setText(_translate("MainWindow", "action ,comedy"))
-        self.close_btn.setText(_translate("MainWindow", "close"))
+        BookDetailWindow.setWindowTitle(_translate("BookDetailWindow", "BookDetailWindow"))
+        self.quantity_book_detail_title_label.setText(_translate("BookDetailWindow", "quantity :"))
+        self.quantity_book_detail_label.setText(_translate("BookDetailWindow", "12"))
+        self.description_book_detail_label.setText(_translate("BookDetailWindow", "here write our description<br>and with <br>get next line"))
+        self.book_nam_detail_label.setText(_translate("BookDetailWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Harray pater</span></p></body></html>"))
+        self.price_book_detail_title_label.setText(_translate("BookDetailWindow", "price :"))
+        self.price_book_detail_label.setText(_translate("BookDetailWindow", "130000"))
+        self.date_book_detail_title_label.setText(_translate("BookDetailWindow", "Time added :"))
+        self.date_book_detail_label.setText(_translate("BookDetailWindow", "1378/08/9"))
+        self.author_book_detail_label.setText(_translate("BookDetailWindow", "wison miler"))
+        self.author_book_detail_title_label.setText(_translate("BookDetailWindow", "by : "))
+        self.publisher_book_detail_title_label.setText(_translate("BookDetailWindow", "publisher:"))
+        self.publisher_book_detail_label.setText(_translate("BookDetailWindow", "tolo"))
+        self.category_book_detail_title_label.setText(_translate("BookDetailWindow", "category :"))
+        self.category_book_detail_label.setText(_translate("BookDetailWindow", "action ,comedy"))
+        self.close_btn.setText(_translate("BookDetailWindow", "close"))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     print("hi")
+#     import sys
+#     app = QtWidgets.QApplication(sys.argv)
+#     BookDetailWindow = QtWidgets.QMainWindow()
+#     ui = Ui_BookDetailWindow()
+#     ui.setupUi(BookDetailWindow)
+#     BookDetailWindow.show()
+#     sys.exit(app.exec_())
