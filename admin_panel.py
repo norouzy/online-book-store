@@ -4,7 +4,7 @@ from sqlalchemy import text
 from PyQt5.QtGui import QPixmap
 import shutil
 import re
-
+import threading
 
 class Ui_MainWindow(object):
 
@@ -33,6 +33,8 @@ class Ui_MainWindow(object):
         self.pictures = None
         self.categoryBoxes = []
         self.bookCatBoxes = []
+        self.bookDetailUi = None
+        self.bookEditUi = None
 
 
     def getPublishers(self):
@@ -146,13 +148,22 @@ class Ui_MainWindow(object):
             self.label_list_author_0.setText('author: ' + item[2])
             self.label_list_price_0.setText('price: ' + str(item[3]))
             self.label_list_publisher_0.setText('publisher: ' + item[4])
+        
 
 
     def bookDetails(self, publisher_id, book_id):
-        print('details ' + book_id, publisher_id)
-
-
+        import book_detail
+        self.bookDetailUi = QtWidgets.QMainWindow()
+        ui_book_detail = book_detail.Ui_BookDetailWindow()
+        ui_book_detail.setupUi(self.bookDetailUi)
+        self.bookDetailUi.show()
+        
     def editBook(self, publisher_id, book_id):
+        import edit_book
+        self.bookEditUi = QtWidgets.QMainWindow()
+        ui_book_detail = edit_book.Ui_BookEditWindow()
+        ui_book_detail.setupUi(self.bookEditUi)
+        self.bookEditUi.show()
         print('edit ' + book_id, publisher_id)
 
 
@@ -1130,5 +1141,5 @@ if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
-    MainWindow.show()
+    MainWindow.show()  
     sys.exit(app.exec_())
