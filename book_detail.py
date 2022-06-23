@@ -1,16 +1,47 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'book_detail.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from tables import db
+from sqlalchemy import text
 
 
 class Ui_BookDetailWindow(object):
+
+    def __init__(self, id):
+        self.book_id = id
+        self.baseQuery = "SELECT Book.picture_url, Book.name, Book.author, Book.description, book_publisher.quantity,"\
+                        +"\n    Publisher.name, Book.date_added, Book.price "\
+                        +"\n    FROM book_publisher"\
+                        +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
+                        +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
+                        +"\n    LEFT JOIN book_order ON book_order.book_id=book.id and book_order.publisher_id=Publisher.id"\
+                        +"\n    GROUP BY Book.id, Publisher.id"\
+                        +f"\n    HAVING Book.id={self.book_id}"
+
+
+        self.categoryQuery = "SELECT Category.name FROM Category JOIN book_category ON Category.id=book_category.category_id"+\
+                            f"\n    WHERE book_category.book_id={self.book_id}"
+
+
+    def fillItems(self):
+
+        categories = []
+        bookData = list(db.engine.execute(text(self.baseQuery)))[0]
+        try:
+            catNames = list(db.engine.execute(text(self.categoryQuery)))[0]
+            categories = [cat for cat in catNames]
+        except:
+            categories = "No Category"
+        
+        self.book_nam_detail_label.setText(bookData[1])
+        self.author_book_detail_label.setText(bookData[2])
+        self.description_book_detail_label.setText(bookData[3])
+        self.quantity_book_detail_label.setText(str(bookData[4]))
+        self.publisher_book_detail_label.setText(bookData[5])
+        self.date_book_detail_label.setText(bookData[6])
+        self.price_book_detail_label.setText(str(bookData[7]))
+        self.category_book_detail_label.setText(str(categories))
+
+    
+
     def setupUi(self, BookDetailWindow):
         BookDetailWindow.setObjectName("BookDetailWindow")
         BookDetailWindow.resize(327, 674)
@@ -145,6 +176,9 @@ class Ui_BookDetailWindow(object):
         self.statusbar.setObjectName("statusbar")
         BookDetailWindow.setStatusBar(self.statusbar)
 
+        # call fill items function
+        self.fillItems()
+
         self.retranslateUi(BookDetailWindow)
         QtCore.QMetaObject.connectSlotsByName(BookDetailWindow)
 
@@ -152,19 +186,19 @@ class Ui_BookDetailWindow(object):
         _translate = QtCore.QCoreApplication.translate
         BookDetailWindow.setWindowTitle(_translate("BookDetailWindow", "BookDetailWindow"))
         self.quantity_book_detail_title_label.setText(_translate("BookDetailWindow", "quantity :"))
-        self.quantity_book_detail_label.setText(_translate("BookDetailWindow", "12"))
-        self.description_book_detail_label.setText(_translate("BookDetailWindow", "here write our description<br>and with <br>get next line"))
-        self.book_nam_detail_label.setText(_translate("BookDetailWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Harray pater</span></p></body></html>"))
+        # self.quantity_book_detail_label.setText(_translate("BookDetailWindow", "12"))
+        # self.description_book_detail_label.setText(_translate("BookDetailWindow", "here write our description<br>and with <br>get next line"))
+        # self.book_nam_detail_label.setText(_translate("BookDetailWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Harray pater</span></p></body></html>"))
         self.price_book_detail_title_label.setText(_translate("BookDetailWindow", "price :"))
-        self.price_book_detail_label.setText(_translate("BookDetailWindow", "130000"))
+        # self.price_book_detail_label.setText(_translate("BookDetailWindow", "130000"))
         self.date_book_detail_title_label.setText(_translate("BookDetailWindow", "Time added :"))
-        self.date_book_detail_label.setText(_translate("BookDetailWindow", "1378/08/9"))
-        self.author_book_detail_label.setText(_translate("BookDetailWindow", "wison miler"))
+        # self.date_book_detail_label.setText(_translate("BookDetailWindow", "1378/08/9"))
+        # self.author_book_detail_label.setText(_translate("BookDetailWindow", "wison miler"))
         self.author_book_detail_title_label.setText(_translate("BookDetailWindow", "by : "))
         self.publisher_book_detail_title_label.setText(_translate("BookDetailWindow", "publisher:"))
-        self.publisher_book_detail_label.setText(_translate("BookDetailWindow", "tolo"))
+        # self.publisher_book_detail_label.setText(_translate("BookDetailWindow", "tolo"))
         self.category_book_detail_title_label.setText(_translate("BookDetailWindow", "category :"))
-        self.category_book_detail_label.setText(_translate("BookDetailWindow", "action ,comedy"))
+        # self.category_book_detail_label.setText(_translate("BookDetailWindow", "action ,comedy"))
         self.close_btn.setText(_translate("BookDetailWindow", "close"))
 
 

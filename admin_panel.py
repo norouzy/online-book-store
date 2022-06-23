@@ -114,26 +114,26 @@ class Ui_MainWindow(object):
             self.gridLayout_list_0.addWidget(self.label_list_publisher_0, 3, 0, 1, 1)
             # detail buttons
             detailBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-            detailBtns[index].setObjectName(str(item[6]) + "_" + str(item[7]))
+            detailBtns[index].setObjectName(str(item[7]))
             self.gridLayout_list_0.addWidget(detailBtns[index], 6, 0, 1, 1)
-            detailBtns[index].clicked.connect(lambda ch, index=index: self.bookDetails(detailBtns[index].objectName().split('_')[0], detailBtns[index].objectName().split('_')[1]))
+            detailBtns[index].clicked.connect(lambda ch, index=index: self.bookDetails(detailBtns[index].objectName()))
             detailBtns[index].setText("more details")
             # buy/edit buttons
             buyEditBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-            buyEditBtns[index].setObjectName(str(item[6]) + "_" + str(item[7]))
+            buyEditBtns[index].setObjectName(str(item[7]))
             self.gridLayout_list_0.addWidget(buyEditBtns[index], 6, 2, 1, 1)
             if self.is_admin:
                 # detail buttons
                 deleteBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-                deleteBtns[index].setObjectName(str(item[6]) + "_" + str(item[7]))
+                deleteBtns[index].setObjectName(str(item[7]))
                 self.gridLayout_list_0.addWidget(deleteBtns[index], 6, 4, 1, 1)
-                deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName().split('_')[0], deleteBtns[index].objectName().split('_')[1]))
+                deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
 
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0], buyEditBtns[index].objectName().split('_')[1]))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName()))
                 buyEditBtns[index].setText("edit")
             else:
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.buyBook(buyEditBtns[index].objectName().split('_')[0], buyEditBtns[index].objectName().split('_')[1]))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.buyBook(buyEditBtns[index].objectName()))
                 buyEditBtns[index].setText("buy")
             # pic
             self.gridLayout_5.addWidget(self.bookObjects[index], index, 1, 1, 1)
@@ -151,28 +151,29 @@ class Ui_MainWindow(object):
         
 
 
-    def bookDetails(self, publisher_id, book_id):
+    def bookDetails(self, book_id):
         import book_detail
         self.bookDetailUi = QtWidgets.QMainWindow()
-        ui_book_detail = book_detail.Ui_BookDetailWindow()
+        ui_book_detail = book_detail.Ui_BookDetailWindow(book_id)
         ui_book_detail.setupUi(self.bookDetailUi)
         self.bookDetailUi.show()
+  
         
-    def editBook(self, publisher_id, book_id):
+    def editBook(self, book_id):
         import edit_book
         self.bookEditUi = QtWidgets.QMainWindow()
         ui_book_detail = edit_book.Ui_BookEditWindow()
         ui_book_detail.setupUi(self.bookEditUi)
         self.bookEditUi.show()
-        print('edit ' + book_id, publisher_id)
+        print('edit ' + book_id)
 
 
-    def buyBook(self, publisher_id, book_id):
-        print('buy ' + book_id, publisher_id)
+    def buyBook(self, book_id):
+        print('buy ' + book_id)
 
  
-    def deleteBook(self, publisher_id, book_id):
-        print('delete ' + book_id, publisher_id)
+    def deleteBook(self, book_id):
+        print('delete ' + book_id)
 
 
     def removeBooks(self):
