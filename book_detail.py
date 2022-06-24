@@ -6,6 +6,7 @@ from sqlalchemy import text
 class Ui_BookDetailWindow(object):
 
     def __init__(self, id):
+        
         self.book_id = id
         self.baseQuery = "SELECT Book.picture_url, Book.name, Book.author, Book.description, book_publisher.quantity,"\
                         +"\n    Publisher.name, Book.date_added, Book.price "\

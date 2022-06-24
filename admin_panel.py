@@ -162,10 +162,11 @@ class Ui_MainWindow(object):
     def editBook(self, book_id):
         import edit_book
         self.bookEditUi = QtWidgets.QMainWindow()
-        ui_book_detail = edit_book.Ui_BookEditWindow()
+        ui_book_detail = edit_book.Ui_BookEditWindow(book_id)
         ui_book_detail.setupUi(self.bookEditUi)
-        self.bookEditUi.show()
-        print('edit ' + book_id)
+        self.bookEditUi.show() 
+        
+        self.setupUi(MainWindow)
 
 
     def buyBook(self, book_id):
@@ -373,7 +374,7 @@ class Ui_MainWindow(object):
                     self.fillBooks(self.baseQuery)
 
                 except:
-                    print('something where wrong while uploading photo!')
+                    print('something went wrong while uploading photo!')
 
         else:
             print('field/fields can not be empty!')
@@ -472,6 +473,7 @@ class Ui_MainWindow(object):
                         self.updateUser(updateButtons[index].objectName().split('_')[0], updateButtons[index].objectName().split('_')[1]))
             deleteButtons[index].clicked.connect(lambda ch, index=index:
                         self.deleteUser(updateButtons[index].objectName().split('_')[1]))
+
 
     def usersSearch(self, input):
         if input:
