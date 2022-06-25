@@ -209,14 +209,14 @@ class Ui_MainWindow(object):
         queries = [
             f"DELETE FROM Book WHERE Book.id={book_id}",
             f"DELETE FROM book_publisher WHERE book_publisher.book_id={book_id}",
-            f"DELETE FROM book_category WHERE book_category.book_id={book_id}"
+            f"DELETE FROM book_category WHERE book_category.book_id={book_id}",
+            f"DELETE FROM book_order WHERE book_order.book_id={book_id}"
         ]
 
         for query in queries:
             db.engine.execute(text(query))
 
-        self.removeBooks()
-        self.fillBooks(self.baseQuery)
+        self.setupUi(MainWindow)
 
 
     def removeBooks(self):
