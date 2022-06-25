@@ -1,4 +1,3 @@
-from logging import exception
 from PyQt5 import QtCore, QtGui, QtWidgets
 from tables import db
 from sqlalchemy import text
@@ -138,6 +137,7 @@ class Ui_BookEditWindow(object):
                     +f"\n   WHERE id={self.book_id}"
             db.engine.execute(text(query))
             print('book info updated!')
+            self.initial = self.newData
 
 
 

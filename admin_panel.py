@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 from tables import db
-from sqlalchemy import text
+from sqlalchemy import false, text
 from PyQt5.QtGui import QPixmap
 import shutil
 import re
@@ -26,6 +26,7 @@ class Ui_MainWindow(object):
                         +"\n    GROUP BY User.username"
 
         self.is_admin = True
+        self.username = "Ali123"
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -120,7 +121,7 @@ class Ui_MainWindow(object):
             detailBtns[index].setText("more details")
             # buy/edit buttons
             buyEditBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
-            buyEditBtns[index].setObjectName(str(item[7]))
+            buyEditBtns[index].setObjectName(str(item[7]) + '_' + str(item[6]))
             self.gridLayout_list_0.addWidget(buyEditBtns[index], 6, 2, 1, 1)
             if self.is_admin:
                 # detail buttons
@@ -130,10 +131,11 @@ class Ui_MainWindow(object):
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
 
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName()))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0]))
                 buyEditBtns[index].setText("edit")
             else:
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.buyBook(buyEditBtns[index].objectName()))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index:
+                            self.buyBook(buyEditBtns[index].objectName().split('_')[0], buyEditBtns[index].objectName().split('_')[1]))
                 buyEditBtns[index].setText("buy")
             # pic
             self.gridLayout_5.addWidget(self.bookObjects[index], index, 1, 1, 1)
@@ -169,12 +171,52 @@ class Ui_MainWindow(object):
         self.setupUi(MainWindow)
 
 
-    def buyBook(self, book_id):
-        print('buy ' + book_id)
+    def buyBook(self, book_id, publisher_id):
 
+        query = "SELECT book_publisher.quantity FROM Book JOIN book_publisher"\
+                +"\n    ON Book.id=book_publisher.book_id"\
+                +f"\n   WHERE Book.id={book_id}"
+        quantity = list(db.engine.execute(text(query)))[0][0]
+
+        query = f"SELECT User.id FROM User WHERE username='{self.username}'"
+        user_id = list(db.engine.execute(text(query)))[0][0]
+
+        if quantity != 0:
+            query = "SELECT book_order.quantity FROM book_order WHERE"\
+                    +f"\n  book_order.book_id={book_id} and book_order.customer_id={user_id}"
+            try:
+                userOrderQuantity = list(db.engine.execute(text(query)))[0][0]
+                query = f"UPDATE book_order SET quantity={userOrderQuantity+1}"\
+                       +f"\n  WHERE book_id={book_id} and customer_id={user_id}"
+                db.engine.execute(text(query))
+                print('new book order added!')
+            except:
+                query = "INSERT INTO book_order(book_id, customer_id, publisher_id, quantity)"\
+                       +f"\n  VALUES({book_id}, {user_id}, {publisher_id}, 1)"
+                db.engine.execute(text(query))
+
+            query = f"UPDATE book_publisher SET quantity={quantity-1} WHERE book_id={book_id}"
+            db.engine.execute(text(query))
+            print('book order updated!')
+            self.setupUi(MainWindow)
+    
+        else:
+            print('this book is currently unavailable!')
+
+                     
  
     def deleteBook(self, book_id):
-        print('delete ' + book_id)
+        queries = [
+            f"DELETE FROM Book WHERE Book.id={book_id}",
+            f"DELETE FROM book_publisher WHERE book_publisher.book_id={book_id}",
+            f"DELETE FROM book_category WHERE book_category.book_id={book_id}"
+        ]
+
+        for query in queries:
+            db.engine.execute(text(query))
+
+        self.removeBooks()
+        self.fillBooks(self.baseQuery)
 
 
     def removeBooks(self):
@@ -199,9 +241,6 @@ class Ui_MainWindow(object):
             self.removeBooks()
             self.fillBooks(self.baseQuery)
             self.setupUi(MainWindow)   
-
-
-        # self.setupUi(MainWindow)
         
    
     def bookFilter(self):
@@ -603,7 +642,7 @@ class Ui_MainWindow(object):
                 +"\n    JOIN User on User.id=Customer.user_id"
         
         if not self.is_admin:
-            query += f"\n WHERE User.username='Ali123'"
+            query += f"\n WHERE User.username='{self.username}'"
         
 
         orders = list(db.engine.execute(text(query)))
@@ -1128,7 +1167,8 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
             self.btn_logout.setText(_translate("MainWindow", "Log out"))
-            self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">Norouzy</span></p></body></html>"))
+            # self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
+            self.label_login_username.setText(self.username)
 
         # check boxes text fill
         for bx in range(0, len(self.bookCatBoxes)):
