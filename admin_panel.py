@@ -25,8 +25,11 @@ class Ui_MainWindow(object):
                         +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
                         +"\n    GROUP BY User.username"
 
-        self.is_admin = True
         self.username = "Ali123"
+        userIDq = f"SELECT User.id FROM User WHERE username='{self.username}'"
+        self.user_id = list(db.engine.execute(text(userIDq)))[0][0]
+
+        self.is_admin = False
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -36,6 +39,7 @@ class Ui_MainWindow(object):
         self.bookCatBoxes = []
         self.bookDetailUi = None
         self.bookEditUi = None
+        self.initialInfo = None
 
 
     def getPublishers(self):
@@ -665,6 +669,49 @@ class Ui_MainWindow(object):
                     item.setText(str(orders[row][col]))
 
 
+    def fillInfo(self):
+
+        query = f"SELECT User.username, Customer.first_name, Customer.last_name, Customer.phone_number,"\
+                +"\n    Customer.address, User.password FROM User JOIN Customer"\
+                +"\n    ON User.id=Customer.user_id"
+
+        infoData = list(db.engine.execute(text(query)))[0]
+        self.initialInfo = [info for info in infoData]
+
+        self.input_user_info_username.setText(infoData[0])
+        self.input_user_info_name.setText(infoData[1])
+        self.input_user_info_lastname.setText(infoData[2])
+        self.input_user_info_number.setText(infoData[3])
+        self.input_user_info_address.setPlainText(infoData[4])
+        self.input_user_info_password.setText(infoData[5])
+
+
+    def updateInfo(self):
+
+        newData = [
+            self.input_user_info_username.text(),
+            self.input_user_info_name.text(),
+            self.input_user_info_lastname.text(),
+            self.input_user_info_number.text(),
+            self.input_user_info_address.toPlainText(),
+            self.input_user_info_password.text()
+        ]
+       
+        nochanges = newData == self.initialInfo
+
+        if not nochanges:
+            query = f"UPDATE User SET username='{newData[0]}', password='{newData[5]}' WHERE id={self.user_id}"
+            db.engine.execute(text(query))
+            query = f"UPDATE Customer SET first_name='{newData[1]}', last_name='{newData[2]}',"\
+                    +f"\n   phone_number='{newData[3]}', address='{newData[4]}' WHERE Customer.user_id={self.user_id}"
+            db.engine.execute(text(query))
+            print('user info updated!')
+            self.initialInfo = newData
+            self.setupUi(MainWindow)
+        else:
+            print('no changes detected!')
+
+
     # layout functions
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -1092,68 +1139,68 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setGeometry(QtCore.QRect(340, 30, 231, 41))
             self.label_inventory_title.setObjectName("label_inventory_title")
             self.tabWidget.addTab(self.inventory, "")
-
-
-            # add info
-
+        else:
+            # -------------------------------------inventory tab--------------------------------------------------------
             self.info = QtWidgets.QWidget()
-        self.info.setObjectName("info")
-        self.user_info_fram = QtWidgets.QFrame(self.info)
-        self.user_info_fram.setGeometry(QtCore.QRect(140, 90, 521, 421))
-        self.user_info_fram.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.user_info_fram.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.user_info_fram.setObjectName("user_info_fram")
-        self.formLayoutWidget_2 = QtWidgets.QWidget(self.user_info_fram)
-        self.formLayoutWidget_2.setGeometry(QtCore.QRect(19, 19, 481, 351))
-        self.formLayoutWidget_2.setObjectName("formLayoutWidget_2")
-        self.formLayout_user_info = QtWidgets.QFormLayout(self.formLayoutWidget_2)
-        self.formLayout_user_info.setContentsMargins(0, 0, 0, 0)
-        self.formLayout_user_info.setObjectName("formLayout_user_info")
-        self.label_info_name = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_info_name.setObjectName("label_info_name")
-        self.formLayout_user_info.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_info_name)
-        self.label_user_info_lastname = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_user_info_lastname.setObjectName("label_user_info_lastname")
-        self.formLayout_user_info.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_user_info_lastname)
-        self.label_user_info_number = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_user_info_number.setObjectName("label_user_info_number")
-        self.formLayout_user_info.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_user_info_number)
-        self.label_user_info_address = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_user_info_address.setObjectName("label_user_info_address")
-        self.formLayout_user_info.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_user_info_address)
-        self.input_user_info_lastname = QtWidgets.QLineEdit(self.formLayoutWidget_2)
-        self.input_user_info_lastname.setObjectName("input_user_info_lastname")
-        self.formLayout_user_info.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.input_user_info_lastname)
-        self.input_user_info_name = QtWidgets.QLineEdit(self.formLayoutWidget_2)
-        self.input_user_info_name.setObjectName("input_user_info_name")
-        self.formLayout_user_info.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.input_user_info_name)
-        self.input_user_info_number = QtWidgets.QLineEdit(self.formLayoutWidget_2)
-        self.input_user_info_number.setObjectName("input_user_info_number")
-        self.formLayout_user_info.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.input_user_info_number)
-        self.input_user_info_address = QtWidgets.QPlainTextEdit(self.formLayoutWidget_2)
-        self.input_user_info_address.setObjectName("input_user_info_address")
-        self.formLayout_user_info.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.input_user_info_address)
-        self.label_user_info_username = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_user_info_username.setObjectName("label_user_info_username")
-        self.formLayout_user_info.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_user_info_username)
-        self.input_user_info_username = QtWidgets.QLineEdit(self.formLayoutWidget_2)
-        self.input_user_info_username.setObjectName("input_user_info_username")
-        self.formLayout_user_info.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.input_user_info_username)
-        self.label_user_info_password = QtWidgets.QLabel(self.formLayoutWidget_2)
-        self.label_user_info_password.setObjectName("label_user_info_password")
-        self.formLayout_user_info.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_user_info_password)
-        self.input_user_info_password = QtWidgets.QLineEdit(self.formLayoutWidget_2)
-        self.input_user_info_password.setObjectName("input_user_info_password")
-        self.formLayout_user_info.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.input_user_info_password)
-        self.btn_user_info_update = QtWidgets.QPushButton(self.user_info_fram)
-        self.btn_user_info_update.setGeometry(QtCore.QRect(230, 380, 80, 24))
-        self.btn_user_info_update.setObjectName("btn_user_info_update")
-        self.label_user_info_title = QtWidgets.QLabel(self.info)
-        self.label_user_info_title.setGeometry(QtCore.QRect(290, 20, 231, 41))
-        self.label_user_info_title.setObjectName("label_user_info_title")
-        self.tabWidget.addTab(self.info, "")
-
-            #end info
+            self.info.setObjectName("info")
+            self.user_info_fram = QtWidgets.QFrame(self.info)
+            self.user_info_fram.setGeometry(QtCore.QRect(140, 90, 521, 421))
+            self.user_info_fram.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.user_info_fram.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.user_info_fram.setObjectName("user_info_fram")
+            self.formLayoutWidget_2 = QtWidgets.QWidget(self.user_info_fram)
+            self.formLayoutWidget_2.setGeometry(QtCore.QRect(19, 19, 481, 351))
+            self.formLayoutWidget_2.setObjectName("formLayoutWidget_2")
+            self.formLayout_user_info = QtWidgets.QFormLayout(self.formLayoutWidget_2)
+            self.formLayout_user_info.setContentsMargins(0, 0, 0, 0)
+            self.formLayout_user_info.setObjectName("formLayout_user_info")
+            self.label_info_name = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_info_name.setObjectName("label_info_name")
+            self.formLayout_user_info.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_info_name)
+            self.label_user_info_lastname = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_user_info_lastname.setObjectName("label_user_info_lastname")
+            self.formLayout_user_info.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_user_info_lastname)
+            self.label_user_info_number = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_user_info_number.setObjectName("label_user_info_number")
+            self.formLayout_user_info.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_user_info_number)
+            self.label_user_info_address = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_user_info_address.setObjectName("label_user_info_address")
+            self.formLayout_user_info.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_user_info_address)
+            self.input_user_info_lastname = QtWidgets.QLineEdit(self.formLayoutWidget_2)
+            self.input_user_info_lastname.setObjectName("input_user_info_lastname")
+            self.formLayout_user_info.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.input_user_info_lastname)
+            self.input_user_info_name = QtWidgets.QLineEdit(self.formLayoutWidget_2)
+            self.input_user_info_name.setObjectName("input_user_info_name")
+            self.formLayout_user_info.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.input_user_info_name)
+            self.input_user_info_number = QtWidgets.QLineEdit(self.formLayoutWidget_2)
+            self.input_user_info_number.setObjectName("input_user_info_number")
+            self.formLayout_user_info.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.input_user_info_number)
+            self.input_user_info_address = QtWidgets.QPlainTextEdit(self.formLayoutWidget_2)
+            self.input_user_info_address.setObjectName("input_user_info_address")
+            self.formLayout_user_info.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.input_user_info_address)
+            self.label_user_info_username = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_user_info_username.setObjectName("label_user_info_username")
+            self.formLayout_user_info.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_user_info_username)
+            self.input_user_info_username = QtWidgets.QLineEdit(self.formLayoutWidget_2)
+            self.input_user_info_username.setObjectName("input_user_info_username")
+            self.formLayout_user_info.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.input_user_info_username)
+            self.label_user_info_password = QtWidgets.QLabel(self.formLayoutWidget_2)
+            self.label_user_info_password.setObjectName("label_user_info_password")
+            self.formLayout_user_info.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_user_info_password)
+            self.input_user_info_password = QtWidgets.QLineEdit(self.formLayoutWidget_2)
+            self.input_user_info_password.setObjectName("input_user_info_password")
+            self.formLayout_user_info.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.input_user_info_password)
+            self.btn_user_info_update = QtWidgets.QPushButton(self.user_info_fram)
+            self.btn_user_info_update.setGeometry(QtCore.QRect(230, 380, 80, 24))
+            self.btn_user_info_update.setObjectName("btn_user_info_update")
+            self.label_user_info_title = QtWidgets.QLabel(self.info)
+            self.label_user_info_title.setGeometry(QtCore.QRect(290, 20, 231, 41))
+            self.label_user_info_title.setObjectName("label_user_info_title")
+            self.tabWidget.addTab(self.info, "")
+            # fill info tab
+            self.fillInfo()
+            # update info event handler
+            self.btn_user_info_update.clicked.connect(lambda: self.updateInfo())
 
         self.btn_logout = QtWidgets.QPushButton(self.centralwidget)
         self.btn_logout.setGeometry(QtCore.QRect(800, 10, 80, 24))
@@ -1230,25 +1277,28 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
 
-            self.label_info_name.setText(_translate("MainWindow", "Name"))
-            self.label_user_info_lastname.setText(_translate("MainWindow", "Last Name"))
-            self.label_user_info_number.setText(_translate("MainWindow", "Phone Number"))
-            self.label_user_info_address.setText(_translate("MainWindow", "Address"))
-            self.input_user_info_lastname.setText(_translate("MainWindow", "noroozi"))
-            self.input_user_info_name.setText(_translate("MainWindow", "mohamad"))
-            self.input_user_info_number.setText(_translate("MainWindow", "09126542563"))
-            self.input_user_info_address.setPlainText(_translate("MainWindow", "iran , tehran ,32"))
-            self.label_user_info_username.setText(_translate("MainWindow", "Username"))
-            self.input_user_info_username.setText(_translate("MainWindow", "Norouzy"))
-            self.label_user_info_password.setText(_translate("MainWindow", "Password"))
-            self.input_user_info_password.setText(_translate("MainWindow", "123456"))
-            self.btn_user_info_update.setText(_translate("MainWindow", "Update"))
-            self.label_user_info_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "info"))
+           
 
             self.btn_logout.setText(_translate("MainWindow", "Log out"))
             # self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
             self.label_login_username.setText(self.username)
+        else:
+            # info tab
+            self.label_info_name.setText(_translate("MainWindow", "Name"))
+            self.label_user_info_lastname.setText(_translate("MainWindow", "Last Name"))
+            self.label_user_info_number.setText(_translate("MainWindow", "Phone Number"))
+            self.label_user_info_address.setText(_translate("MainWindow", "Address"))
+            # self.input_user_info_lastname.setText(_translate("MainWindow", "noroozi"))
+            # self.input_user_info_name.setText(_translate("MainWindow", "mohamad"))
+            # self.input_user_info_number.setText(_translate("MainWindow", "09126542563"))
+            # self.input_user_info_address.setPlainText(_translate("MainWindow", "iran , tehran ,32"))
+            self.label_user_info_username.setText(_translate("MainWindow", "Username"))
+            # self.input_user_info_username.setText(_translate("MainWindow", "Norouzy"))
+            self.label_user_info_password.setText(_translate("MainWindow", "Password"))
+            # self.input_user_info_password.setText(_translate("MainWindow", "123456"))
+            self.btn_user_info_update.setText(_translate("MainWindow", "Update"))
+            self.label_user_info_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "info"))
 
         # check boxes text fill
         for bx in range(0, len(self.bookCatBoxes)):
