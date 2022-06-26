@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 from tables import db
 from sqlalchemy import false, text
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import pyqtSignal
 import shutil
 import re
 import threading
@@ -9,7 +10,6 @@ import threading
 class Ui_MainWindow(object):
 
     def __init__(self):
-
         self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
                         +"\n    FROM book_publisher"\
                         +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
@@ -25,11 +25,11 @@ class Ui_MainWindow(object):
                         +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
                         +"\n    GROUP BY User.username"
 
-        self.username = "Ali123"
+        self.username = "norouzy"
         userIDq = f"SELECT User.id FROM User WHERE username='{self.username}'"
         self.user_id = list(db.engine.execute(text(userIDq)))[0][0]
 
-        self.is_admin = False
+        self.is_admin = True
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -135,7 +135,7 @@ class Ui_MainWindow(object):
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
 
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0]))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],MainWindow))
                 buyEditBtns[index].setText("edit")
             else:
                 buyEditBtns[index].clicked.connect(lambda ch, index=index:
@@ -156,7 +156,6 @@ class Ui_MainWindow(object):
             self.label_list_publisher_0.setText('publisher: ' + item[4])
         
 
-
     def bookDetails(self, book_id):
         import book_detail
         self.bookDetailUi = QtWidgets.QMainWindow()
@@ -164,15 +163,26 @@ class Ui_MainWindow(object):
         ui_book_detail.setupUi(self.bookDetailUi)
         self.bookDetailUi.show()
   
+    def update_main_window(main_self):
+        self = main_self   
+        self.setupUi(self.MainWindow)
+    def editBook(self, book_id,MainWindow):
         
-    def editBook(self, book_id):
         import edit_book
+        self.MainWindow = MainWindow
         self.bookEditUi = QtWidgets.QMainWindow()
-        ui_book_detail = edit_book.Ui_BookEditWindow(book_id)
+        ui_book_detail = edit_book.Ui_BookEditWindow(book_id,self)
         ui_book_detail.setupUi(self.bookEditUi)
         self.bookEditUi.show() 
+
+        # import edit_book
+        # self.MainWindow = QtWidgets.QMainWindow()
+        # ui = edit_book.Ui_BookEditWindow(book_id,self)
+        # ui.setupUi(MainWindow)
+        # MainWindow.show()
+
         
-        self.setupUi(MainWindow)
+        
 
 
     def buyBook(self, book_id, publisher_id):
@@ -1205,6 +1215,7 @@ class Ui_MainWindow(object):
         self.btn_logout = QtWidgets.QPushButton(self.centralwidget)
         self.btn_logout.setGeometry(QtCore.QRect(800, 10, 80, 24))
         self.btn_logout.setObjectName("btn_logout")
+
         self.label_login_username = QtWidgets.QLabel(self.centralwidget)
         self.label_login_username.setGeometry(QtCore.QRect(10, 10, 201, 16))
         self.label_login_username.setObjectName("label_login_username")
