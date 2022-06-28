@@ -9,7 +9,7 @@ import threading
 
 class Ui_MainWindow(object):
 
-    def __init__(self):
+    def __init__(self,username,password,MainWindow):
         self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
                         +"\n    FROM book_publisher"\
                         +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
@@ -25,11 +25,15 @@ class Ui_MainWindow(object):
                         +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
                         +"\n    GROUP BY User.username"
 
-        self.username = "norouzy"
-        userIDq = f"SELECT User.id FROM User WHERE username='{self.username}'"
-        self.user_id = list(db.engine.execute(text(userIDq)))[0][0]
+        self.MainWindow = MainWindow
+        userData = f"SELECT * FROM User WHERE username='{username}' AND password='{password}'"
+        self.user_data = list(db.engine.execute(text(userData)))
+        print(self.user_data)
+        self.user_id = self.user_data[0][0]
+        self.username = username
 
-        self.is_admin = True
+        self.is_admin = True if self.user_data[0][4] == 1 else False
+        print(self.is_admin)
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -41,6 +45,10 @@ class Ui_MainWindow(object):
         self.bookEditUi = None
         self.initialInfo = None
 
+    def logout(self):
+        from login import Ui_LoginWindow
+        ui = Ui_LoginWindow()
+        ui.setupUi(self.MainWindow)
 
     def getPublishers(self):
         query = "SELECT name FROM Publisher"
@@ -135,7 +143,7 @@ class Ui_MainWindow(object):
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
 
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],MainWindow))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],self.MainWindow))
                 buyEditBtns[index].setText("edit")
             else:
                 buyEditBtns[index].clicked.connect(lambda ch, index=index:
@@ -212,7 +220,7 @@ class Ui_MainWindow(object):
             query = f"UPDATE book_publisher SET quantity={quantity-1} WHERE book_id={book_id}"
             db.engine.execute(text(query))
             print('book order updated!')
-            self.setupUi(MainWindow)
+            self.setupUi(self.MainWindow)
     
         else:
             print('this book is currently unavailable!')
@@ -710,7 +718,7 @@ class Ui_MainWindow(object):
         nochanges = newData == self.initialInfo
 
         if not nochanges:
-            query = f"UPDATE User SET username='{newData[0]}', password='{newData[5]}' WHERE id={self.user_id}"
+            query = f"UPDATE User SET username='{newData[0]}', password='{newData[5]}' WHERE id='{self.user_id}'"
             db.engine.execute(text(query))
             query = f"UPDATE Customer SET first_name='{newData[1]}', last_name='{newData[2]}',"\
                     +f"\n   phone_number='{newData[3]}', address='{newData[4]}' WHERE Customer.user_id={self.user_id}"
@@ -1215,6 +1223,7 @@ class Ui_MainWindow(object):
         self.btn_logout = QtWidgets.QPushButton(self.centralwidget)
         self.btn_logout.setGeometry(QtCore.QRect(800, 10, 80, 24))
         self.btn_logout.setObjectName("btn_logout")
+        self.btn_logout.clicked.connect(self.logout)
 
         self.label_login_username = QtWidgets.QLabel(self.centralwidget)
         self.label_login_username.setGeometry(QtCore.QRect(10, 10, 201, 16))
@@ -1288,11 +1297,6 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
 
-           
-
-            self.btn_logout.setText(_translate("MainWindow", "Log out"))
-            # self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
-            self.label_login_username.setText(self.username)
         else:
             # info tab
             self.label_info_name.setText(_translate("MainWindow", "Name"))
@@ -1307,9 +1311,16 @@ class Ui_MainWindow(object):
             # self.input_user_info_username.setText(_translate("MainWindow", "Norouzy"))
             self.label_user_info_password.setText(_translate("MainWindow", "Password"))
             # self.input_user_info_password.setText(_translate("MainWindow", "123456"))
+            self.btn_logout.setText(_translate("MainWindow", "Log out"))
+            self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
             self.btn_user_info_update.setText(_translate("MainWindow", "Update"))
             self.label_user_info_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "info"))
+
+        
+        self.btn_logout.setText(_translate("MainWindow", "Log out"))
+        self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
+        self.label_login_username.setText(self.username)
 
         # check boxes text fill
         for bx in range(0, len(self.bookCatBoxes)):
@@ -1319,11 +1330,11 @@ class Ui_MainWindow(object):
                 self.categoryBoxes[bx].setText(_translate("MainWindow", objName))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()  
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     import sys
+#     app = QtWidgets.QApplication(sys.argv)
+#     MainWindow = QtWidgets.QMainWindow()
+#     ui = Ui_MainWindow()
+#     ui.setupUi(MainWindow)
+#     MainWindow.show()  
+#     sys.exit(app.exec_())

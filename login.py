@@ -3,25 +3,31 @@ from tables import db
 from sqlalchemy import text
 
 
-class Ui_MainWindow(object):
+class Ui_LoginWindow(object):
 
-    def loginHandle(self):
+    def loginHandle(self,MainWindow):
 
         username = self.login_username.text()
         password = self.login_password.text()
+        # username = "norouzy"
+        # password = "123456789"
 
         if username and password:
             query = f"SELECT COUNT(*) FROM User WHERE username='{username}' and password='{password}'"     
             result = db.engine.execute(text(query))
             authenticated = True if list(result)[0][0] == 1 else False
-
             print('user authenticated: ', authenticated)
+            
+            if authenticated :
+                from admin_panel import Ui_MainWindow
+                ui = Ui_MainWindow(username,password,MainWindow)
+                ui.setupUi(MainWindow)
 
         else:
             print('field/fields can not be empty!')
         
 
-    def signUpHandle(self):  
+    def signUpHandle(self,MainWindow):  
 
         valuesDict = {
             'first_name': self.last_name.text(),
@@ -57,6 +63,10 @@ class Ui_MainWindow(object):
             query = f"INSERT INTO Customer(first_name, last_name, user_id, phone_number, address) VALUES('{valuesDict['first_name']}', '{valuesDict['last_name']}', {user_id}, '{valuesDict['phone_number']}', '{valuesDict['address']}')"
             db.engine.execute(text(query))
             print('user created!')
+
+            from admin_panel import Ui_MainWindow
+            ui = Ui_MainWindow(valuesDict['username'],valuesDict['password'],MainWindow)
+            ui.setupUi(MainWindow)
 
 
     def setupUi(self, MainWindow):
@@ -170,8 +180,8 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         # ----------------------- connectors start-------------------------
-        self.login_btn.clicked.connect(self.loginHandle)
-        self.signin_btn.clicked.connect(self.signUpHandle)
+        self.login_btn.clicked.connect(lambda:self.loginHandle(MainWindow))
+        self.signin_btn.clicked.connect(lambda:self.signUpHandle(MainWindow))
         # ----------------------- connectors ending-------------------------
 
         self.retranslateUi(MainWindow)
@@ -201,7 +211,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
+    ui = Ui_LoginWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
