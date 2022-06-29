@@ -3,6 +3,7 @@ from tables import db
 from sqlalchemy import text
 
 
+
 class Ui_LoginWindow(object):
 
     def loginHandle(self,MainWindow):

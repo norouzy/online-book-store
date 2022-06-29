@@ -6,11 +6,15 @@ from PyQt5.QtCore import pyqtSignal
 import shutil
 import re
 import threading
+from PIL import Image
+import os
+from urllib.parse import urlparse
+import random
 
 class Ui_MainWindow(object):
 
     def __init__(self,username,password,MainWindow):
-        self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
+        self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, Book.picture_url, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
                         +"\n    FROM book_publisher"\
                         +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
                         +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
@@ -154,6 +158,9 @@ class Ui_MainWindow(object):
             self.pictures.append(QtWidgets.QGraphicsView(self.scrollAreaWidgetContents))
             self.pictures[index].setMinimumSize(QtCore.QSize(220, 150))
             self.pictures[index].setMaximumSize(QtCore.QSize(220, 150))
+            print(item[5])
+            self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/"+ item[5] +");background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
+            # self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/book.jpeg);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
             self.pictures[index].setObjectName("list_picture_" + str(index))        
             self.gridLayout_5.addWidget(self.pictures[index], index, 0, 1, 1)
             # giving values
@@ -174,6 +181,7 @@ class Ui_MainWindow(object):
     def update_main_window(main_self):
         self = main_self   
         self.setupUi(self.MainWindow)
+    
     def editBook(self, book_id,MainWindow):
         
         import edit_book
@@ -188,9 +196,6 @@ class Ui_MainWindow(object):
         # ui = edit_book.Ui_BookEditWindow(book_id,self)
         # ui.setupUi(MainWindow)
         # MainWindow.show()
-
-        
-        
 
 
     def buyBook(self, book_id, publisher_id):
@@ -224,8 +229,7 @@ class Ui_MainWindow(object):
     
         else:
             print('this book is currently unavailable!')
-
-                     
+          
  
     def deleteBook(self, book_id):
         queries = [
@@ -412,11 +416,14 @@ class Ui_MainWindow(object):
             else:      
                 try:
                     url = inputDict['image_url'][::-1]
-                    x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
-                    url = url[x.start() : x.end()][::-1]
-                    shutil.copy(inputDict['image_url'], 'online-book-store\pictures')
+                    print(os.path.basename(inputDict['image_url'])) 
+                    print("inputDict",inputDict['image_url'])
+                    url = str(random.randint(9999,9999999))+"_"+os.path.basename(inputDict['image_url'])
+                    print("url",url)
 
-                    query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', 'pictures{url}', {inputDict['price']}, '{inputDict['description']}')"
+                    shutil.copy(inputDict['image_url'], f"pictures/{url}")
+
+                    query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', '{url}', {inputDict['price']}, '{inputDict['description']}')"
                     db.engine.execute(text(query))
                     query = f"SELECT id FROM Book WHERE name='{inputDict['name']}' ORDER BY date_added DESC LIMIT 1"
                     insertedBook_id = list(db.engine.execute(text(query)))[0][0]
@@ -434,8 +441,9 @@ class Ui_MainWindow(object):
                     self.removeBooks()
                     self.fillBooks(self.baseQuery)
 
-                except:
+                except Exception as e:
                     print('something went wrong while uploading photo!')
+                    print(e)
 
         else:
             print('field/fields can not be empty!')
@@ -443,7 +451,7 @@ class Ui_MainWindow(object):
 
 
     def getPicture(self):
-        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Book Photo', '', '*.jpg')
+        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'Book Photo', '', '(*.jpg *.gif *.png *.jpeg)')
         self.input_addbook_picture.setText(url)
 
 
@@ -725,7 +733,7 @@ class Ui_MainWindow(object):
             db.engine.execute(text(query))
             print('user info updated!')
             self.initialInfo = newData
-            self.setupUi(MainWindow)
+            self.setupUi(self.MainWindow)
         else:
             print('no changes detected!')
 
