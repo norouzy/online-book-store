@@ -1,16 +1,20 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from tables import db
 from sqlalchemy import false, text
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox
 import shutil
 import re
 import threading
 
 class Ui_MainWindow(object):
+    # main functions
 
-    def __init__(self):
+    def __init__(self, user_id, is_admin, username, MainWindow):
 
-        self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
+        self.baseQuery = "SELECT Book.name, book_publisher.quantity, Book.author, Book.price, Publisher.name,"\
+                        +"\n    ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
                         +"\n    FROM book_publisher"\
                         +"\n    JOIN Book ON book_publisher.book_id=Book.id"\
                         +"\n    JOIN Publisher ON Publisher.id=book_publisher.publisher_id"\
@@ -25,11 +29,12 @@ class Ui_MainWindow(object):
                         +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
                         +"\n    GROUP BY User.username"
 
-        self.username = "Ali123"
-        userIDq = f"SELECT User.id FROM User WHERE username='{self.username}'"
-        self.user_id = list(db.engine.execute(text(userIDq)))[0][0]
-
-        self.is_admin = False
+        self.MainWindow = MainWindow
+    
+        self.user_id = user_id
+        self.username = username
+        self.is_admin = is_admin
+        
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -40,6 +45,24 @@ class Ui_MainWindow(object):
         self.bookDetailUi = None
         self.bookEditUi = None
         self.initialInfo = None
+
+
+    def logout(self):
+        from login import Ui_LoginWindow
+        ui = Ui_LoginWindow()
+        ui.setupUi(self.MainWindow)
+
+
+    def OkMsgBox(self,type,  title, text):
+        msg = QMessageBox()
+        if type == 'warning':
+            msg.setIcon(QMessageBox.Warning)
+        else:
+            msg.setIcon(QMessageBox.Information)
+        msg.setText(text)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
 
     def getPublishers(self):
@@ -135,7 +158,7 @@ class Ui_MainWindow(object):
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
 
-                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0]))
+                buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],self.MainWindow))
                 buyEditBtns[index].setText("edit")
             else:
                 buyEditBtns[index].clicked.connect(lambda ch, index=index:
@@ -156,7 +179,6 @@ class Ui_MainWindow(object):
             self.label_list_publisher_0.setText('publisher: ' + item[4])
         
 
-
     def bookDetails(self, book_id):
         import book_detail
         self.bookDetailUi = QtWidgets.QMainWindow()
@@ -164,15 +186,29 @@ class Ui_MainWindow(object):
         ui_book_detail.setupUi(self.bookDetailUi)
         self.bookDetailUi.show()
   
+    def update_main_window(main_self):
+        self = main_self   
+        self.setupUi(self.MainWindow)
+
+
+    def editBook(self, book_id,MainWindow):
+        self.QustainMsgBox()
         
-    def editBook(self, book_id):
-        import edit_book
-        self.bookEditUi = QtWidgets.QMainWindow()
-        ui_book_detail = edit_book.Ui_BookEditWindow(book_id)
-        ui_book_detail.setupUi(self.bookEditUi)
-        self.bookEditUi.show() 
+        # import edit_book
+        # self.MainWindow = MainWindow
+        # self.bookEditUi = QtWidgets.QMainWindow()
+        # ui_book_detail = edit_book.Ui_BookEditWindow(book_id,self)
+        # ui_book_detail.setupUi(self.bookEditUi)
+        # self.bookEditUi.show() 
+
+        # import edit_book
+        # self.MainWindow = QtWidgets.QMainWindow()
+        # ui = edit_book.Ui_BookEditWindow(book_id,self)
+        # ui.setupUi(MainWindow)
+        # MainWindow.show()
+
         
-        self.setupUi(MainWindow)
+        
 
 
     def buyBook(self, book_id, publisher_id):
@@ -193,7 +229,7 @@ class Ui_MainWindow(object):
                 query = f"UPDATE book_order SET quantity={userOrderQuantity+1}"\
                        +f"\n  WHERE book_id={book_id} and customer_id={user_id}"
                 db.engine.execute(text(query))
-                print('new book order added!')
+                self.OkMsgBox("information", "success", "order added sucessfully!")
             except:
                 query = "INSERT INTO book_order(book_id, customer_id, publisher_id, quantity)"\
                        +f"\n  VALUES({book_id}, {user_id}, {publisher_id}, 1)"
@@ -201,11 +237,11 @@ class Ui_MainWindow(object):
 
             query = f"UPDATE book_publisher SET quantity={quantity-1} WHERE book_id={book_id}"
             db.engine.execute(text(query))
-            print('book order updated!')
-            self.setupUi(MainWindow)
+            self.OkMsgBox("information", "order success", "order added sucessfully!")
+            self.setupUi(self.MainWindow)
     
         else:
-            print('this book is currently unavailable!')
+            self.OkMsgBox("warning", "order failure", "selected book is currently unavailable!")
 
                      
  
@@ -219,7 +255,7 @@ class Ui_MainWindow(object):
 
         for query in queries:
             db.engine.execute(text(query))
-
+        self.OkMsgBox("information", "success", "book deleted sucessfully!")
         self.setupUi(MainWindow)
 
 
@@ -438,7 +474,7 @@ class Ui_MainWindow(object):
         updateButtons = []
     
         for index, item in enumerate(users):   
-
+            
             self.userObjects.append(QtWidgets.QFrame(self.scrollAreaWidgetContents_user_main))
             self.userObjects[index].setMinimumSize(QtCore.QSize(839, 65))   
             self.userObjects[index].setMaximumSize(QtCore.QSize(839, 65)) 
@@ -670,11 +706,11 @@ class Ui_MainWindow(object):
 
 
     def fillInfo(self):
-
+        username = self.username
         query = f"SELECT User.username, Customer.first_name, Customer.last_name, Customer.phone_number,"\
                 +"\n    Customer.address, User.password FROM User JOIN Customer"\
-                +"\n    ON User.id=Customer.user_id"
-
+                +f"\n    ON User.id=Customer.user_id Where User.username = '{username}'"
+        print(query)
         infoData = list(db.engine.execute(text(query)))[0]
         self.initialInfo = [info for info in infoData]
 
@@ -700,7 +736,7 @@ class Ui_MainWindow(object):
         nochanges = newData == self.initialInfo
 
         if not nochanges:
-            query = f"UPDATE User SET username='{newData[0]}', password='{newData[5]}' WHERE id={self.user_id}"
+            query = f"UPDATE User SET username='{newData[0]}', password='{newData[5]}' WHERE id='{self.user_id}'"
             db.engine.execute(text(query))
             query = f"UPDATE Customer SET first_name='{newData[1]}', last_name='{newData[2]}',"\
                     +f"\n   phone_number='{newData[3]}', address='{newData[4]}' WHERE Customer.user_id={self.user_id}"
@@ -1140,7 +1176,7 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setObjectName("label_inventory_title")
             self.tabWidget.addTab(self.inventory, "")
         else:
-            # -------------------------------------inventory tab--------------------------------------------------------
+            # -------------------------------------user info tab--------------------------------------------------------
             self.info = QtWidgets.QWidget()
             self.info.setObjectName("info")
             self.user_info_fram = QtWidgets.QFrame(self.info)
@@ -1205,6 +1241,8 @@ class Ui_MainWindow(object):
         self.btn_logout = QtWidgets.QPushButton(self.centralwidget)
         self.btn_logout.setGeometry(QtCore.QRect(800, 10, 80, 24))
         self.btn_logout.setObjectName("btn_logout")
+        self.btn_logout.clicked.connect(self.logout)
+
         self.label_login_username = QtWidgets.QLabel(self.centralwidget)
         self.label_login_username.setGeometry(QtCore.QRect(10, 10, 201, 16))
         self.label_login_username.setObjectName("label_login_username")
@@ -1277,11 +1315,6 @@ class Ui_MainWindow(object):
             self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
 
-           
-
-            self.btn_logout.setText(_translate("MainWindow", "Log out"))
-            # self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
-            self.label_login_username.setText(self.username)
         else:
             # info tab
             self.label_info_name.setText(_translate("MainWindow", "Name"))
@@ -1296,9 +1329,16 @@ class Ui_MainWindow(object):
             # self.input_user_info_username.setText(_translate("MainWindow", "Norouzy"))
             self.label_user_info_password.setText(_translate("MainWindow", "Password"))
             # self.input_user_info_password.setText(_translate("MainWindow", "123456"))
+            self.btn_logout.setText(_translate("MainWindow", "Log out"))
+            self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
             self.btn_user_info_update.setText(_translate("MainWindow", "Update"))
             self.label_user_info_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "info"))
+
+        
+        self.btn_logout.setText(_translate("MainWindow", "Log out"))
+        self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
+        self.label_login_username.setText(self.username)
 
         # check boxes text fill
         for bx in range(0, len(self.bookCatBoxes)):
@@ -1308,11 +1348,11 @@ class Ui_MainWindow(object):
                 self.categoryBoxes[bx].setText(_translate("MainWindow", objName))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()  
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     import sys
+#     app = QtWidgets.QApplication(sys.argv)
+#     MainWindow = QtWidgets.QMainWindow()
+#     ui = Ui_MainWindow()
+#     ui.setupUi(MainWindow)
+#     MainWindow.show()  
+#     sys.exit(app.exec_())

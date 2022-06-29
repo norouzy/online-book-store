@@ -3,12 +3,15 @@ from tables import db
 from sqlalchemy import text
 import shutil
 import re
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox
 
 
 class Ui_BookEditWindow(object):
 
-    def __init__(self, id):
+    def __init__(self, id,main_self):
         self.book_id=id
+        self.main_self = main_self
         self.baseQuery = "SELECT Book.picture_url, Book.name, Book.author, Book.description, book_publisher.quantity,"\
                         +"\n    Publisher.name, Book.price "\
                         +"\n    FROM book_publisher"\
@@ -80,6 +83,11 @@ class Ui_BookEditWindow(object):
 
 
     def updateInfo(self):
+        from admin_panel import Ui_MainWindow
+        import admin_panel
+        # print(self.main_self)
+        # print(self.main_self.label_login_username)
+        # self.main_self.label_login_username.setText("qqqqqqqqqq")
         self.newData = [
             self.input_addbook_picture.text(),
             self.input_publisher_name_2.text(),
@@ -109,37 +117,37 @@ class Ui_BookEditWindow(object):
             
             try:
                 shutil.copy(self.newData[0], 'online-book-store\pictures')
-            except Exception as e:
+                    
+                query = f"SELECT id FROM Publisher WHERE name='{self.newData[5]}'"
+                publisher_id = list(db.engine.execute(text(query)))[0][0]
+
+                query = f"DELETE FROM book_publisher WHERE book_id={self.book_id}"
+                db.engine.execute(text(query))
+
+                query = "INSERT INTO book_publisher(book_id, publisher_id, quantity)"\
+                        +f"\n    VALUES({self.book_id}, {publisher_id}, {self.newData[4]})"
+                db.engine.execute(text(query))
+
+                query = f"DELETE FROM book_category WHERE book_id={self.book_id}"
+                db.engine.execute(text(query))
+                for cat in self.categoryBoxes:
+                        if cat.isChecked():
+                            query = f"SELECT id FROM category WHERE name='{cat.objectName()}'"
+                            category_id = list(db.engine.execute(text(query)))[0][0]
+                            query = f"INSERT INTO book_category(book_id, category_id) VALUES({self.book_id}, {category_id})"
+                            db.engine.execute(text(query))
+
+                query = "UPDATE Book"\
+                        +f"\n   SET name='{self.newData[1]}', author='{self.newData[2]}',"\
+                        +f"\n   picture_url='{self.newData[0]}', price={self.newData[6]}, description='{self.newData[3]}'"\
+                        +f"\n   WHERE id={self.book_id}"
+                db.engine.execute(text(query))
+                print('book info updated!')
+                self.initial = self.newData
+            except Exception as e:               
                 print(e)
-            
-            query = f"SELECT id FROM Publisher WHERE name='{self.newData[5]}'"
-            publisher_id = list(db.engine.execute(text(query)))[0][0]
 
-            query = f"DELETE FROM book_publisher WHERE book_id={self.book_id}"
-            db.engine.execute(text(query))
-
-            query = "INSERT INTO book_publisher(book_id, publisher_id, quantity)"\
-                    +f"\n    VALUES({self.book_id}, {publisher_id}, {self.newData[4]})"
-            db.engine.execute(text(query))
-
-            query = f"DELETE FROM book_category WHERE book_id={self.book_id}"
-            db.engine.execute(text(query))
-            for cat in self.categoryBoxes:
-                    if cat.isChecked():
-                        query = f"SELECT id FROM category WHERE name='{cat.objectName()}'"
-                        category_id = list(db.engine.execute(text(query)))[0][0]
-                        query = f"INSERT INTO book_category(book_id, category_id) VALUES({self.book_id}, {category_id})"
-                        db.engine.execute(text(query))
-
-            query = "UPDATE Book"\
-                    +f"\n   SET name='{self.newData[1]}', author='{self.newData[2]}',"\
-                    +f"\n   picture_url='{self.newData[0]}', price={self.newData[6]}, description='{self.newData[3]}'"\
-                    +f"\n   WHERE id={self.book_id}"
-            db.engine.execute(text(query))
-            print('book info updated!')
-            self.initial = self.newData
-
-
+        Ui_MainWindow.update_main_window(self.main_self)
 
     def getPicture(self):
         url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'New Photo', '', '*.jpg')

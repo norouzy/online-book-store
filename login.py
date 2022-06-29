@@ -1,27 +1,38 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from tables import db
 from sqlalchemy import text
 
 
-class Ui_MainWindow(object):
+class Ui_LoginWindow(object):
+    # main functions
 
-    def loginHandle(self):
+    def loginHandle(self,MainWindow):
 
         username = self.login_username.text()
         password = self.login_password.text()
 
         if username and password:
-            query = f"SELECT COUNT(*) FROM User WHERE username='{username}' and password='{password}'"     
+            query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{username}' and password='{password}')"     
             result = db.engine.execute(text(query))
             authenticated = True if list(result)[0][0] == 1 else False
+            
+            if authenticated :
+                query = f"SELECT id FROM User WHERE username='{username}'"
+                user_id = list(db.engine.execute(text(query)))[0][0]
 
-            print('user authenticated: ', authenticated)
-
-        else:
-            print('field/fields can not be empty!')
+                query = f"SELECT is_admin FROM User WHERE username='{username}'"
+                is_admin = True if list(db.engine.execute(text(query)))[0][0] == 1 else False
+                
+                # calling user panel
+                from admin_panel import Ui_MainWindow
+                ui = Ui_MainWindow(user_id, is_admin, username ,MainWindow)
+                ui.setupUi(MainWindow)
+            else:
+                self.createMsgBox("warning", "login failure", "incorrect username or password")     
         
 
-    def signUpHandle(self):  
+    def signUpHandle(self,MainWindow):  
 
         valuesDict = {
             'first_name': self.last_name.text(),
@@ -32,33 +43,56 @@ class Ui_MainWindow(object):
             'address': self.address_sign.toPlainText()
         }
 
-        query = f"SELECT COUNT(*) from User WHERE username='{valuesDict['username']}'"
+        query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{valuesDict['username']}')"
         result = db.engine.execute(text(query))
         user_exists = True if list(result)[0][0] == 1 else False
 
         if '' in valuesDict.values():
-            print('field/fields can not be empty!')
+            self.createMsgBox("warning", "signup failure", "input field/fields can not be empty!")
 
         elif user_exists:
-            print('another user with this username found!')
+            self.createMsgBox("warning", "signup failure", "another user with this username exists!")
 
         elif len(valuesDict['password']) < 5:
-            print('weak password!')
+            self.createMsgBox("warning", "signup failure", "entered password is too weak!")
 
         elif not valuesDict['phone_number'].isdigit():
-            print('wrong phone number!')
+            self.createMsgBox("warning", "signup failure", "please enter a valid phone number!")
 
         else:  
-            query = f"INSERT INTO User(username, password, is_admin) VALUES('{valuesDict['username']}', '{valuesDict['password']}', FALSE)"
+            query =  "INSERT INTO User(username, password, is_admin)"\
+                    +f"\n      VALUES('{valuesDict['username']}', '{valuesDict['password']}', FALSE)"
             db.engine.execute(text(query))
+
             query = f"SELECT id FROM User WHERE username='{valuesDict['username']}'"
             result = db.engine.execute(text(query))
             user_id = list(result)[0][0]
-            query = f"INSERT INTO Customer(first_name, last_name, user_id, phone_number, address) VALUES('{valuesDict['first_name']}', '{valuesDict['last_name']}', {user_id}, '{valuesDict['phone_number']}', '{valuesDict['address']}')"
+
+            query = "INSERT INTO Customer(first_name, last_name, user_id, phone_number, address)"\
+                    +f"\n   VALUES('{valuesDict['first_name']}', '{valuesDict['last_name']}', {user_id},"\
+                    +f"\n  '{valuesDict['phone_number']}', '{valuesDict['address']}')"
             db.engine.execute(text(query))
-            print('user created!')
+
+            self.createMsgBox("information", "sign up success", "new user created!")
+
+            # calling user panel
+            from admin_panel import Ui_MainWindow
+            ui = Ui_MainWindow(user_id, False, valuesDict['username'], MainWindow)
+            ui.setupUi(MainWindow)
 
 
+    def createMsgBox(self,type,  title, text):
+        msg = QMessageBox()
+        if type == 'warning':
+            msg.setIcon(QMessageBox.Warning)
+        else:
+            msg.setIcon(QMessageBox.Information)
+        msg.setText(text)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
+    # ui functions
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(340, 500)
@@ -170,8 +204,8 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         # ----------------------- connectors start-------------------------
-        self.login_btn.clicked.connect(self.loginHandle)
-        self.signin_btn.clicked.connect(self.signUpHandle)
+        self.login_btn.clicked.connect(lambda:self.loginHandle(MainWindow))
+        self.signin_btn.clicked.connect(lambda:self.signUpHandle(MainWindow))
         # ----------------------- connectors ending-------------------------
 
         self.retranslateUi(MainWindow)
@@ -179,7 +213,8 @@ class Ui_MainWindow(object):
         self.login_btn.clicked.connect(MainWindow.update)
         self.signin_btn.clicked.connect(MainWindow.update)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        
+
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Online Book Store"))
@@ -201,7 +236,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
+    ui = Ui_LoginWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
