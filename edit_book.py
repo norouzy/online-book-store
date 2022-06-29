@@ -264,7 +264,9 @@ class Ui_BookEditWindow(object):
         self.frame_addbook_picture.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_addbook_picture.setObjectName("frame_addbook_picture")
         self.btn_addbook_broswer = QtWidgets.QPushButton(self.layoutWidget)
-        self.btn_addbook_broswer.setGeometry(QtCore.QRect(115, 468, 63, 21))
+        self.btn_addbook_broswer.setMaximumSize(QtCore.QSize(80, 24))
+        self.btn_addbook_broswer.setMinimumSize(QtCore.QSize(80, 24))
+        self.btn_addbook_broswer.setGeometry(QtCore.QRect(95, 470, 80, 24))
         self.btn_addbook_broswer.setObjectName("btn_addbook_broswer")
         # picture browse button event handler
         self.btn_addbook_broswer.clicked.connect(lambda: self.getPicture())
