@@ -688,11 +688,11 @@ class Ui_MainWindow(object):
 
 
     def fillInfo(self):
-
+        username = self.username
         query = f"SELECT User.username, Customer.first_name, Customer.last_name, Customer.phone_number,"\
                 +"\n    Customer.address, User.password FROM User JOIN Customer"\
-                +"\n    ON User.id=Customer.user_id"
-
+                +f"\n    ON User.id=Customer.user_id Where User.username = '{username}'"
+        print(query)
         infoData = list(db.engine.execute(text(query)))[0]
         self.initialInfo = [info for info in infoData]
 

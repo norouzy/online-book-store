@@ -11,6 +11,8 @@ class Ui_LoginWindow(object):
         password = self.login_password.text()
         # username = "norouzy"
         # password = "123456789"
+        # username = "ali"
+        # password = "123456789"
 
         if username and password:
             query = f"SELECT COUNT(*) FROM User WHERE username='{username}' and password='{password}'"     
