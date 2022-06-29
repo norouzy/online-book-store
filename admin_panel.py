@@ -60,7 +60,7 @@ class Ui_MainWindow(object):
         ui.setupUi(self.MainWindow)
 
 
-    def OkMsgBox(self,type,  title, text):
+    def OkMsgBox(self,type, title, text):
         msg = QMessageBox()
         if type == 'warning':
             msg.setIcon(QMessageBox.Warning)
@@ -214,7 +214,7 @@ class Ui_MainWindow(object):
 
 
     def buyBook(self, book_id, publisher_id):
-
+        
         query = "SELECT book_publisher.quantity FROM Book JOIN book_publisher"\
                 +"\n    ON Book.id=book_publisher.book_id"\
                 +f"\n   WHERE Book.id={book_id}"
@@ -282,7 +282,7 @@ class Ui_MainWindow(object):
             self.bookSearch = None
             self.removeBooks()
             self.fillBooks(self.baseQuery)
-            self.setupUi(MainWindow)   
+            self.setupUi(self.MainWindow)   
         
    
     def bookFilter(self):
@@ -302,7 +302,8 @@ class Ui_MainWindow(object):
 
             convertedList = f"('{selectedCategories[0]}')" if len(selectedCategories) == 1 else tuple(selectedCategories)
             
-            query = f"SELECT Book.name,book_publisher.quantity,Book.author,Book.price,Publisher.name,Category.name, ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id"\
+            query = f"SELECT Book.name,book_publisher.quantity,Book.author,Book.price,Publisher.name,"\
+                    +"\n    ifnull(book_order.quantity, 0) as ordcount, publisher.id, Book.id, Book.picture_url"\
                     +"\n    FROM book_category"\
                     +"\n    JOIN Book ON Book.id=book_category.book_id"\
                     +"\n    JOIN Category ON Category.id=book_category.category_id"\
