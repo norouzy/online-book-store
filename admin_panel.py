@@ -9,7 +9,6 @@ import re
 import threading
 from PIL import Image
 import os
-from urllib.parse import urlparse
 import random
 
 class Ui_MainWindow(object):
@@ -153,7 +152,6 @@ class Ui_MainWindow(object):
             detailBtns[index].setObjectName(str(item[7]))
             self.gridLayout_list_0.addWidget(detailBtns[index], 6, 0, 1, 1)
             detailBtns[index].clicked.connect(lambda ch, index=index: self.bookDetails(detailBtns[index].objectName()))
-            print("detailBtns[index]",detailBtns[index])
             detailBtns[index].setText("more details")
             # buy/edit buttons
             buyEditBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
@@ -177,7 +175,6 @@ class Ui_MainWindow(object):
             self.pictures.append(QtWidgets.QGraphicsView(self.scrollAreaWidgetContents))
             self.pictures[index].setMinimumSize(QtCore.QSize(220, 150))
             self.pictures[index].setMaximumSize(QtCore.QSize(220, 150))
-            print(item[8])
             self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/"+ item[8] +");background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
             # self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/book.jpeg);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
             self.pictures[index].setObjectName("list_picture_" + str(index))        
@@ -191,7 +188,6 @@ class Ui_MainWindow(object):
         
 
     def bookDetails(self, book_id):
-        print(book_id)
         import book_detail
         self.bookDetailUi = QtWidgets.QMainWindow()
         ui_book_detail = book_detail.Ui_BookDetailWindow(book_id)
@@ -203,7 +199,6 @@ class Ui_MainWindow(object):
         self.setupUi(self.MainWindow)
     
     def editBook(self, book_id,MainWindow):
-        print(book_id)
         import edit_book
         self.MainWindow = MainWindow
         self.bookEditUi = QtWidgets.QMainWindow()
@@ -253,7 +248,6 @@ class Ui_MainWindow(object):
                      
  
     def deleteBook(self, book_id):
-        print(book_id)
         queries = [
             f"DELETE FROM Book WHERE Book.id={book_id}",
             f"DELETE FROM book_publisher WHERE book_publisher.book_id={book_id}",
@@ -437,12 +431,7 @@ class Ui_MainWindow(object):
 
             else:      
                 try:
-                    url = inputDict['image_url'][::-1]
-                    print(os.path.basename(inputDict['image_url'])) 
-                    print("inputDict",inputDict['image_url'])
                     url = str(random.randint(9999,9999999))+"_"+os.path.basename(inputDict['image_url'])
-                    print("url",url)
-
                     shutil.copy(inputDict['image_url'], f"pictures/{url}")
 
                     query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', '{url}', {inputDict['price']}, '{inputDict['description']}')"

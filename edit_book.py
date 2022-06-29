@@ -5,6 +5,8 @@ import shutil
 import re
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
+import os
+import random
 
 
 class Ui_BookEditWindow(object):
@@ -111,12 +113,15 @@ class Ui_BookEditWindow(object):
         elif not self.newData[4].isdigit() or not self.newData[6].isdigit():
             print('invalid input(price and quantity must be integer!)')
         else:            
-            url = self.newData[0][::-1]
-            x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
-            url = url[x.start() : x.end()][::-1]
+            # url = self.newData[0][::-1]
+            # x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
+            # url = url[x.start() : x.end()][::-1]
             
             try:
-                shutil.copy(self.newData[0], 'online-book-store\pictures')
+                url = str(random.randint(9999,9999999))+"_"+os.path.basename(self.newData[0])
+                shutil.copy(self.newData[0], f"pictures/{url}")
+                self.newData[0] = url
+
                     
                 query = f"SELECT id FROM Publisher WHERE name='{self.newData[5]}'"
                 publisher_id = list(db.engine.execute(text(query)))[0][0]
@@ -176,7 +181,7 @@ class Ui_BookEditWindow(object):
         Ui_MainWindow.update_main_window(self.main_self)
 
     def getPicture(self):
-        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'New Photo', '', '*.jpg')
+        url, _ = QtWidgets.QFileDialog.getOpenFileName(None, 'New Photo', '', '(*.jpg *.gif *.png *.jpeg)')
         self.input_addbook_picture.setText(url)
 
 
