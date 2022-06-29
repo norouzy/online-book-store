@@ -21,11 +21,15 @@ class Ui_BookDetailWindow(object):
         self.categoryQuery = "SELECT Category.name FROM Category JOIN book_category ON Category.id=book_category.category_id"+\
                             f"\n    WHERE book_category.book_id={self.book_id}"
 
+        self.bookData = list(db.engine.execute(text(self.baseQuery)))
+        print(self.bookData)
+        self.bookData = self.bookData[0]
 
     def fillItems(self):
 
         categories = []
-        bookData = list(db.engine.execute(text(self.baseQuery)))[0]
+        bookData = self.bookData
+        print(bookData)
         try:
             catNames = list(db.engine.execute(text(self.categoryQuery)))[0]
             categories = [cat for cat in catNames]
@@ -54,6 +58,7 @@ class Ui_BookDetailWindow(object):
         self.main_fram.setFrameShadow(QtWidgets.QFrame.Raised)
         self.main_fram.setObjectName("main_fram")
         self.detail_book_image = QtWidgets.QGraphicsView(self.main_fram)
+        self.detail_book_image.setStyleSheet("#detail_book_image { background-image: url(pictures/"+ self.bookData[0] +");background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
         self.detail_book_image.setGeometry(QtCore.QRect(10, 10, 261, 191))
         self.detail_book_image.setObjectName("detail_book_image")
         self.scrollArea = QtWidgets.QScrollArea(self.main_fram)

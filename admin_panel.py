@@ -32,12 +32,10 @@ class Ui_MainWindow(object):
         self.MainWindow = MainWindow
         userData = f"SELECT * FROM User WHERE username='{username}' AND password='{password}'"
         self.user_data = list(db.engine.execute(text(userData)))
-        print(self.user_data)
         self.user_id = self.user_data[0][0]
         self.username = username
 
         self.is_admin = True if self.user_data[0][4] == 1 else False
-        print(self.is_admin)
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -134,6 +132,7 @@ class Ui_MainWindow(object):
             detailBtns[index].setObjectName(str(item[7]))
             self.gridLayout_list_0.addWidget(detailBtns[index], 6, 0, 1, 1)
             detailBtns[index].clicked.connect(lambda ch, index=index: self.bookDetails(detailBtns[index].objectName()))
+            print("detailBtns[index]",detailBtns[index])
             detailBtns[index].setText("more details")
             # buy/edit buttons
             buyEditBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
@@ -146,7 +145,6 @@ class Ui_MainWindow(object):
                 self.gridLayout_list_0.addWidget(deleteBtns[index], 6, 4, 1, 1)
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
                 deleteBtns[index].setText("delete")
-
                 buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],self.MainWindow))
                 buyEditBtns[index].setText("edit")
             else:
@@ -172,6 +170,7 @@ class Ui_MainWindow(object):
         
 
     def bookDetails(self, book_id):
+        print(book_id)
         import book_detail
         self.bookDetailUi = QtWidgets.QMainWindow()
         ui_book_detail = book_detail.Ui_BookDetailWindow(book_id)
@@ -183,7 +182,7 @@ class Ui_MainWindow(object):
         self.setupUi(self.MainWindow)
     
     def editBook(self, book_id,MainWindow):
-        
+        print(book_id)
         import edit_book
         self.MainWindow = MainWindow
         self.bookEditUi = QtWidgets.QMainWindow()
@@ -232,6 +231,7 @@ class Ui_MainWindow(object):
           
  
     def deleteBook(self, book_id):
+        print(book_id)
         queries = [
             f"DELETE FROM Book WHERE Book.id={book_id}",
             f"DELETE FROM book_publisher WHERE book_publisher.book_id={book_id}",
@@ -242,7 +242,7 @@ class Ui_MainWindow(object):
         for query in queries:
             db.engine.execute(text(query))
 
-        self.setupUi(MainWindow)
+        self.setupUi(self.MainWindow)
 
 
     def removeBooks(self):
