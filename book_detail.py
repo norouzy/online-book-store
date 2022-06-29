@@ -29,7 +29,6 @@ class Ui_BookDetailWindow(object):
 
         categories = []
         bookData = self.bookData
-        print(bookData)
         try:
             catNames = list(db.engine.execute(text(self.categoryQuery)))[0]
             categories = [cat for cat in catNames]
@@ -45,6 +44,8 @@ class Ui_BookDetailWindow(object):
         self.price_book_detail_label.setText(str(bookData[7]))
         self.category_book_detail_label.setText(str(categories))
 
+    def close_window(self,BookDetailWindow):
+        BookDetailWindow.deleteLater()
     
 
     def setupUi(self, BookDetailWindow):
@@ -172,6 +173,7 @@ class Ui_BookDetailWindow(object):
         self.scrollArea.setWidget(self.scrollView_book_detail)
         self.close_btn = QtWidgets.QPushButton(self.main_fram)
         self.close_btn.setGeometry(QtCore.QRect(100, 570, 80, 24))
+        self.close_btn.clicked.connect(lambda: self.close_window(BookDetailWindow))
         self.close_btn.setObjectName("close_btn")
         BookDetailWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(BookDetailWindow)
