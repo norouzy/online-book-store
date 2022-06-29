@@ -146,7 +146,33 @@ class Ui_BookEditWindow(object):
                 self.initial = self.newData
             except Exception as e:               
                 print(e)
+            
+            query = f"SELECT id FROM Publisher WHERE name='{self.newData[5]}'"
+            publisher_id = list(db.engine.execute(text(query)))[0][0]
 
+            query = f"DELETE FROM book_publisher WHERE book_id={self.book_id}"
+            db.engine.execute(text(query))
+
+            query = "INSERT INTO book_publisher(book_id, publisher_id, quantity)"\
+                    +f"\n    VALUES({self.book_id}, {publisher_id}, {self.newData[4]})"
+            db.engine.execute(text(query))
+
+            query = f"DELETE FROM book_category WHERE book_id={self.book_id}"
+            db.engine.execute(text(query))
+            for cat in self.categoryBoxes:
+                    if cat.isChecked():
+                        query = f"SELECT id FROM category WHERE name='{cat.objectName()}'"
+                        category_id = list(db.engine.execute(text(query)))[0][0]
+                        query = f"INSERT INTO book_category(book_id, category_id) VALUES({self.book_id}, {category_id})"
+                        db.engine.execute(text(query))
+
+            query = "UPDATE Book"\
+                    +f"\n   SET name='{self.newData[1]}', author='{self.newData[2]}',"\
+                    +f"\n   picture_url='{self.newData[0]}', price={self.newData[6]}, description='{self.newData[3]}'"\
+                    +f"\n   WHERE id={self.book_id}"
+            db.engine.execute(text(query))
+            print('book info updated!')
+            self.initial = self.newData
         Ui_MainWindow.update_main_window(self.main_self)
 
     def getPicture(self):

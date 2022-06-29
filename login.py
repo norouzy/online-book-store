@@ -11,6 +11,10 @@ class Ui_LoginWindow(object):
 
         username = self.login_username.text()
         password = self.login_password.text()
+        # username = "norouzy"
+        # password = "123456789"
+        # username = "ali"
+        # password = "123456789"
 
         if username and password:
             query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{username}' and password='{password}')"     
@@ -78,6 +82,10 @@ class Ui_LoginWindow(object):
             # calling user panel
             from admin_panel import Ui_MainWindow
             ui = Ui_MainWindow(user_id, False, valuesDict['username'], MainWindow)
+            ui.setupUi(MainWindow)
+
+            from admin_panel import Ui_MainWindow
+            ui = Ui_MainWindow(valuesDict['username'],valuesDict['password'],MainWindow)
             ui.setupUi(MainWindow)
 
 
