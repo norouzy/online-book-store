@@ -11,7 +11,7 @@ import random
 
 class Ui_BookEditWindow(object):
 
-    def __init__(self, id,main_self):
+    def __init__(self, id, main_self):
         self.book_id=id
         self.main_self = main_self
         self.baseQuery = "SELECT Book.picture_url, Book.name, Book.author, Book.description, book_publisher.quantity,"\
@@ -30,6 +30,18 @@ class Ui_BookEditWindow(object):
         self.initial = []
         self.initialCats = []
         self.newData = []
+
+
+    def OkMsgBox(self,type, title, text):
+        msg = QMessageBox()
+        if type == 'warning':
+            msg.setIcon(QMessageBox.Warning)
+        else:
+            msg.setIcon(QMessageBox.Information)
+        msg.setText(text)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
 
     def placeCatBoxes(self):
@@ -87,9 +99,7 @@ class Ui_BookEditWindow(object):
     def updateInfo(self):
         from admin_panel import Ui_MainWindow
         import admin_panel
-        # print(self.main_self)
-        # print(self.main_self.label_login_username)
-        # self.main_self.label_login_username.setText("qqqqqqqqqq")
+
         self.newData = [
             self.input_addbook_picture.text(),
             self.input_publisher_name_2.text(),
@@ -107,15 +117,12 @@ class Ui_BookEditWindow(object):
 
         nochanges = (self.newData == self.initial) and (self.initialCats == selectedCategories)
         if nochanges:
-            print("no changes detected!")
+            self.OkMsgBox("warning", "failure", "no changes detected!")
         elif '' in self.newData:
-            print('filed/fields can not be empty!')
+            self.OkMsgBox("warning", "failure", "input field/fields can not be empty!")
         elif not self.newData[4].isdigit() or not self.newData[6].isdigit():
-            print('invalid input(price and quantity must be integer!)')
+            self.OkMsgBox("warning", "failure", "ivalid input for price or quantity!")
         else:            
-            # url = self.newData[0][::-1]
-            # x = re.search('^gpj(.+?)/', url, re.IGNORECASE)
-            # url = url[x.start() : x.end()][::-1]
             
             try:
                 url = str(random.randint(9999,9999999))+"_"+os.path.basename(self.newData[0])
@@ -147,37 +154,12 @@ class Ui_BookEditWindow(object):
                         +f"\n   picture_url='{self.newData[0]}', price={self.newData[6]}, description='{self.newData[3]}'"\
                         +f"\n   WHERE id={self.book_id}"
                 db.engine.execute(text(query))
-                print('book info updated!')
+                self.OkMsgBox("information", "success", "book data updated sucessfully!")
                 self.initial = self.newData
-            except Exception as e:               
-                print(e)
+            except:               
+                self.OkMsgBox("warning", "failure", "something went wrong while uploading photo!")
             
-            query = f"SELECT id FROM Publisher WHERE name='{self.newData[5]}'"
-            publisher_id = list(db.engine.execute(text(query)))[0][0]
-
-            query = f"DELETE FROM book_publisher WHERE book_id={self.book_id}"
-            db.engine.execute(text(query))
-
-            query = "INSERT INTO book_publisher(book_id, publisher_id, quantity)"\
-                    +f"\n    VALUES({self.book_id}, {publisher_id}, {self.newData[4]})"
-            db.engine.execute(text(query))
-
-            query = f"DELETE FROM book_category WHERE book_id={self.book_id}"
-            db.engine.execute(text(query))
-            for cat in self.categoryBoxes:
-                    if cat.isChecked():
-                        query = f"SELECT id FROM category WHERE name='{cat.objectName()}'"
-                        category_id = list(db.engine.execute(text(query)))[0][0]
-                        query = f"INSERT INTO book_category(book_id, category_id) VALUES({self.book_id}, {category_id})"
-                        db.engine.execute(text(query))
-
-            query = "UPDATE Book"\
-                    +f"\n   SET name='{self.newData[1]}', author='{self.newData[2]}',"\
-                    +f"\n   picture_url='{self.newData[0]}', price={self.newData[6]}, description='{self.newData[3]}'"\
-                    +f"\n   WHERE id={self.book_id}"
-            db.engine.execute(text(query))
-            print('book info updated!')
-            self.initial = self.newData
+           
         Ui_MainWindow.update_main_window(self.main_self)
 
     def getPicture(self):
