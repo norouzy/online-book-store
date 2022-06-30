@@ -635,12 +635,12 @@ class Ui_MainWindow(object):
         objects = []
 
         titles = [
-            'Total Number Of Books ',
-            'Number Of Sold Books ',
-            'Total Books Price ',
-            'Total Sold Books Price ',
-            'Total Sold Books Price(last 7 days) ',
-            'Total Sold Books Price(last 30 days) '
+            '📈 Total Number Of Books ',
+            '📈 Number Of Sold Books ',
+            '💰 Total Books Price ',
+            '💰 Total Sold Books Price ',
+            '💰 Total Sold Books Price(last 7 days) ',
+            '💰 Total Sold Books Price(last 30 days) '
         ]
         queries = [
             "SELECT SUM(book_publisher.quantity) FROM Book JOIN book_publisher ON Book.id=book_publisher.book_id",
@@ -675,8 +675,12 @@ class Ui_MainWindow(object):
 
             qResult = list(db.engine.execute(queries[index]))[0][0]
 
-            self.label_inventory_title_0.setText(titles[index])  
-            self.label_inventory_0.setText(str(qResult))
+            self.label_inventory_title_0.setText(titles[index]) 
+            if index>1:
+                self.label_inventory_0.setText(str(qResult) + "💲")
+            else:
+                self.label_inventory_0.setText(str(qResult))
+
    
 
 
@@ -1249,7 +1253,7 @@ class Ui_MainWindow(object):
             self.btn_user_show.setText(_translate("MainWindow", "✂️ filter"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "🚻 Users"))
             # inventory tab
-            self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
+            self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:13pt; font-weight:600;\">💜Online Book Store Info💜</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "📊 Inventory"))
 
         else:
