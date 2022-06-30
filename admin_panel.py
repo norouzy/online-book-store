@@ -4,12 +4,7 @@ from sqlalchemy import false, text
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
-import shutil
-import re
-import threading
-from PIL import Image
-import os
-import random
+import shutil,re,os,random
 
 class Ui_MainWindow(object):
     # main functions
