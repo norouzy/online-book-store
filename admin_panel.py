@@ -209,12 +209,6 @@ class Ui_MainWindow(object):
         ui_book_detail.setupUi(self.bookEditUi)
         self.bookEditUi.show() 
 
-        # import edit_book
-        # self.MainWindow = QtWidgets.QMainWindow()
-        # ui = edit_book.Ui_BookEditWindow(book_id,self)
-        # ui.setupUi(MainWindow)
-        # MainWindow.show()
-
 
     def buyBook(self, book_id, publisher_id):
         
@@ -389,7 +383,7 @@ class Ui_MainWindow(object):
                     +f"\n   VALUES('{inputDict['name']}', '{inputDict['phone_number']}', '{inputDict['website_url']}')"
             db.engine.execute(text(query))
             self.OkMsgBox("information", "success", "new publisher have been sucessfully added!")
-            self.setupUi(MainWindow)           
+            self.setupUi(self.MainWindow)           
 
 
 
@@ -839,7 +833,7 @@ class Ui_MainWindow(object):
             self.publisher = QtWidgets.QWidget()
             self.publisher.setObjectName("publisher")
             self.frame_publisher_add = QtWidgets.QFrame(self.publisher)
-            self.frame_publisher_add.setGeometry(QtCore.QRect(510, 70, 351, 211))
+            self.frame_publisher_add.setGeometry(QtCore.QRect(269, 102, 351, 211))
             self.frame_publisher_add.setFrameShape(QtWidgets.QFrame.StyledPanel)
             self.frame_publisher_add.setFrameShadow(QtWidgets.QFrame.Raised)
             self.frame_publisher_add.setObjectName("frame_publisher_add")
@@ -880,32 +874,6 @@ class Ui_MainWindow(object):
             self.formLayout_publisher_main.setItem(4, QtWidgets.QFormLayout.FieldRole, spacerItem2)
             spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
             self.formLayout_publisher_main.setItem(8, QtWidgets.QFormLayout.FieldRole, spacerItem3)
-            self.scrollArea_publisher_main = QtWidgets.QScrollArea(self.publisher)
-            self.scrollArea_publisher_main.setGeometry(QtCore.QRect(10, 70, 411, 421))
-            self.scrollArea_publisher_main.setWidgetResizable(True)
-            self.scrollArea_publisher_main.setObjectName("scrollArea_publisher_main")
-            self.scrollAreaWidgetContents_publisher = QtWidgets.QWidget()
-            self.scrollAreaWidgetContents_publisher.setGeometry(QtCore.QRect(0, 0, 409, 419))
-            self.scrollAreaWidgetContents_publisher.setObjectName("scrollAreaWidgetContents_publisher")
-            self.gridLayout_18 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_publisher)
-            self.gridLayout_18.setObjectName("gridLayout_18")
-            self.gridLayout_publisher_main = QtWidgets.QGridLayout()
-            self.gridLayout_publisher_main.setObjectName("gridLayout_publisher_main")
-            self.frame_publisher_0 = QtWidgets.QFrame(self.scrollAreaWidgetContents_publisher)
-            self.frame_publisher_0.setMinimumSize(QtCore.QSize(0, 45))
-            self.frame_publisher_0.setMaximumSize(QtCore.QSize(16777215, 45))
-            self.frame_publisher_0.setFrameShape(QtWidgets.QFrame.StyledPanel)
-            self.frame_publisher_0.setFrameShadow(QtWidgets.QFrame.Raised)
-            self.frame_publisher_0.setObjectName("frame_publisher_0")
-            self.label_publisher_name_0 = QtWidgets.QLabel(self.frame_publisher_0)
-            self.label_publisher_name_0.setGeometry(QtCore.QRect(17, 9, 241, 31))
-            self.label_publisher_name_0.setObjectName("label_publisher_name_0")
-            self.btn_publisher_delete_0 = QtWidgets.QPushButton(self.frame_publisher_0)
-            self.btn_publisher_delete_0.setGeometry(QtCore.QRect(270, 10, 80, 24))
-            self.btn_publisher_delete_0.setObjectName("btn_publisher_delete_0")
-            self.gridLayout_publisher_main.addWidget(self.frame_publisher_0, 0, 0, 1, 1)
-            self.gridLayout_18.addLayout(self.gridLayout_publisher_main, 0, 0, 1, 1)
-            self.scrollArea_publisher_main.setWidget(self.scrollAreaWidgetContents_publisher)
             self.label_publisher_error = QtWidgets.QLabel(self.publisher)
             self.label_publisher_error.setGeometry(QtCore.QRect(580, 410, 271, 31))
             self.label_publisher_error.setObjectName("label_publisher_error")
@@ -1250,8 +1218,8 @@ class Ui_MainWindow(object):
             self.label_publisher_number.setText(_translate("MainWindow", "Phone Number"))
             self.label_publisher_web.setText(_translate("MainWindow", "Web site"))
             self.btn_publisher_add.setText(_translate("MainWindow", "Add"))
-            self.label_publisher_name_0.setText(_translate("MainWindow", "tolo"))
-            self.btn_publisher_delete_0.setText(_translate("MainWindow", "Delete"))
+            # self.label_publisher_name_0.setText(_translate("MainWindow", "tolo"))
+            # self.btn_publisher_delete_0.setText(_translate("MainWindow", "Delete"))
             # self.label_publisher_error.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Error</p></body></html>"))
             self.label_publisher_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">Publishers</span></p></body></html>"))
             self.tabWidget.setTabText(self.tabWidget.indexOf(self.publisher), _translate("MainWindow", "📝 Add Publisher"))
