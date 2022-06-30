@@ -13,8 +13,8 @@ class Ui_LoginWindow(object):
         password = self.login_password.text()
         # username = "norouzy"
         # password = "123456789"
-        # username = "ali"
-        # password = "123456789"
+        # username = "admin"
+        # password = "root"
 
         if username and password:
             query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{username}' and password='{password}')"     
@@ -225,19 +225,19 @@ class Ui_LoginWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Online Book Store"))
-        self.label_2.setText(_translate("MainWindow", "Password"))
-        self.label.setText(_translate("MainWindow", "Username"))
-        self.login_btn.setText(_translate("MainWindow", "Login"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.login), _translate("MainWindow", "Login"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "💙 Online Book Store 💙"))
+        self.label_2.setText(_translate("MainWindow", "🔑 Password"))
+        self.label.setText(_translate("MainWindow", "👮‍ Username"))
+        self.login_btn.setText(_translate("MainWindow", "👉 Login 👈"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.login), _translate("MainWindow", "🟢 Login"))
         self.label_5.setText(_translate("MainWindow", "Phone Number"))
         self.label_6.setText(_translate("MainWindow", "Address"))
         self.label_3.setText(_translate("MainWindow", "Username"))
-        self.signin_btn.setText(_translate("MainWindow", "Sign Up"))
+        self.signin_btn.setText(_translate("MainWindow", "👉 Sign Up 👈"))
         self.label_4.setText(_translate("MainWindow", "Password"))
         self.label_7.setText(_translate("MainWindow", "Name"))
         self.label_8.setText(_translate("MainWindow", "Last Name"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.signup), _translate("MainWindow", "Sign Up"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.signup), _translate("MainWindow", "🔵 Sign Up"))
 
 
 if __name__ == "__main__":

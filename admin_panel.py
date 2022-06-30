@@ -150,7 +150,8 @@ class Ui_MainWindow(object):
             detailBtns[index].setObjectName(str(item[7]))
             self.gridLayout_list_0.addWidget(detailBtns[index], 6, 0, 1, 1)
             detailBtns[index].clicked.connect(lambda ch, index=index: self.bookDetails(detailBtns[index].objectName()))
-            detailBtns[index].setText("more details")
+            detailBtns[index].setText("👀 More Details")
+            detailBtns[index].setStyleSheet("#"+str(detailBtns[index].objectName())+" {color:blue;}")
             # buy/edit buttons
             buyEditBtns.append(QtWidgets.QPushButton(self.gridLayoutWidget))
             buyEditBtns[index].setObjectName(str(item[7]) + '_' + str(item[6]))
@@ -161,13 +162,15 @@ class Ui_MainWindow(object):
                 deleteBtns[index].setObjectName(str(item[7]))
                 self.gridLayout_list_0.addWidget(deleteBtns[index], 6, 4, 1, 1)
                 deleteBtns[index].clicked.connect(lambda ch, index=index: self.deleteBook(deleteBtns[index].objectName()))
-                deleteBtns[index].setText("delete")
+                deleteBtns[index].setText("🗑 Delete")
+                deleteBtns[index].setStyleSheet("#"+str(deleteBtns[index].objectName())+" {color:red;}")
                 buyEditBtns[index].clicked.connect(lambda ch, index=index: self.editBook(buyEditBtns[index].objectName().split('_')[0],self.MainWindow))
-                buyEditBtns[index].setText("edit")
+                buyEditBtns[index].setText("♻️ Edit")
+                buyEditBtns[index].setStyleSheet("#"+str(buyEditBtns[index].objectName())+" {color:green;}")
             else:
                 buyEditBtns[index].clicked.connect(lambda ch, index=index:
                             self.buyBook(buyEditBtns[index].objectName().split('_')[0], buyEditBtns[index].objectName().split('_')[1]))
-                buyEditBtns[index].setText("buy")
+                buyEditBtns[index].setText("🛒 Buy")
             # pic
             self.gridLayout_5.addWidget(self.bookObjects[index], index, 1, 1, 1)
             self.pictures.append(QtWidgets.QGraphicsView(self.scrollAreaWidgetContents))
@@ -1230,17 +1233,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Online Shop ❤️"))
         # book tab   
-        self.btn_list_search.setText(_translate("MainWindow", "Search"))
-        self.btn_list_show.setText(_translate("MainWindow", "Filter"))         
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.list), _translate("MainWindow", "Books"))
+        self.btn_list_search.setText(_translate("MainWindow", "🔎 Search"))
+        self.btn_list_show.setText(_translate("MainWindow", "✂️ Filter"))         
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.list), _translate("MainWindow", "📚 Books"))
         # orders tab
         __sortingEnabled = self.tableWidget_order.isSortingEnabled()
         self.tableWidget_order.setSortingEnabled(False)       
         self.tableWidget_order.setSortingEnabled(__sortingEnabled)
         self.label_order_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">All Orders</span></p></body></html>"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.orders), _translate("MainWindow", "Orders"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.orders), _translate("MainWindow", "🛒 Orders"))
         if self.is_admin:
 
             self.label_publisher_name.setText(_translate("MainWindow", "Name"))
@@ -1249,11 +1252,11 @@ class Ui_MainWindow(object):
             self.btn_publisher_add.setText(_translate("MainWindow", "Add"))
             self.label_publisher_name_0.setText(_translate("MainWindow", "tolo"))
             self.btn_publisher_delete_0.setText(_translate("MainWindow", "Delete"))
-            self.label_publisher_error.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Error</p></body></html>"))
+            # self.label_publisher_error.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\">Error</p></body></html>"))
             self.label_publisher_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">Publishers</span></p></body></html>"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.publisher), _translate("MainWindow", "Add Publisher"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.publisher), _translate("MainWindow", "📝 Add Publisher"))
             # add book tab
-            self.label_addbook_error.setText(_translate("MainWindow", "error"))
+            # self.label_addbook_error.setText(_translate("MainWindow", "error"))
             self.label_addbook_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">name</span></p></body></html>"))
             self.label_addbook_picture.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">Picture</span></p></body></html>"))
             self.label_addbook_author.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">author</span></p></body></html>"))
@@ -1264,9 +1267,9 @@ class Ui_MainWindow(object):
             self.label_addbook_price.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">price</span></p></body></html>"))
             self.btn_addbook_broswer.setText(_translate("MainWindow", "Broswer"))
             self.label_addbook_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; font-weight:600;\">add books</span></p></body></html>"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.add), _translate("MainWindow", "Add Book"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.add), _translate("MainWindow", "✏️ Add Book"))
             # users tab
-            self.btn_user_search.setText(_translate("MainWindow", "Search"))
+            self.btn_user_search.setText(_translate("MainWindow", "🔎 Search"))
             self.label_user_phone.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Phone</span></p></body></html>"))
             self.label_user_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">name</span></p></body></html>"))
             self.label_user_delete.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Delete</span></p></body></html>"))
@@ -1275,11 +1278,11 @@ class Ui_MainWindow(object):
             self.label_user_update.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Update</span></p></body></html>"))
             self.label_user_address.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Address</span></p></body></html>"))
             self.label_user_isadmin.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">Is Admin</span></p></body></html>"))     
-            self.btn_user_show.setText(_translate("MainWindow", "filter"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "Users"))
+            self.btn_user_show.setText(_translate("MainWindow", "✂️ filter"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.users), _translate("MainWindow", "🚻 Users"))
             # inventory tab
             self.label_inventory_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "Inventory"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.inventory), _translate("MainWindow", "📊 Inventory"))
 
         else:
             # info tab
@@ -1299,12 +1302,12 @@ class Ui_MainWindow(object):
             self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
             self.btn_user_info_update.setText(_translate("MainWindow", "Update"))
             self.label_user_info_title.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">Online Book Store Info</span></p></body></html>"))
-            self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "info"))
+            self.tabWidget.setTabText(self.tabWidget.indexOf(self.info), _translate("MainWindow", "⚙️ info"))
 
         
-        self.btn_logout.setText(_translate("MainWindow", "Log out"))
+        self.btn_logout.setText(_translate("MainWindow", "↩️ Log out"))
         self.label_login_username.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\"></span></p></body></html>"))
-        self.label_login_username.setText(self.username)
+        self.label_login_username.setText("👤 "+str(self.username))
 
         # check boxes text fill
         for bx in range(0, len(self.bookCatBoxes)):
