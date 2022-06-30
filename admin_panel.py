@@ -32,12 +32,10 @@ class Ui_MainWindow(object):
                         +"\n    LEFT JOIN book_order ON book_order.customer_id=User.id"\
                         +"\n    GROUP BY User.username"
 
-        self.MainWindow = MainWindow
-    
+        self.MainWindow = MainWindow   
         self.user_id = user_id
         self.username = username
-        self.is_admin = is_admin
-        
+        self.is_admin = is_admin      
         self.bookSearch = None
         self.userSearch = None
         self.bookObjects = None
@@ -48,6 +46,7 @@ class Ui_MainWindow(object):
         self.bookDetailUi = None
         self.bookEditUi = None
         self.initialInfo = None
+
 
     def logout(self):
         from login import Ui_LoginWindow
@@ -110,7 +109,6 @@ class Ui_MainWindow(object):
             
 
     def fillBooks(self, query):
-        print(query)
 
         detailBtns = []
         buyEditBtns = []
@@ -175,7 +173,9 @@ class Ui_MainWindow(object):
             self.pictures.append(QtWidgets.QGraphicsView(self.scrollAreaWidgetContents))
             self.pictures[index].setMinimumSize(QtCore.QSize(220, 150))
             self.pictures[index].setMaximumSize(QtCore.QSize(220, 150))
-            self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/"+ item[8] +");background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
+            self.pictures[index].setStyleSheet("#list_picture_"+str(index)+
+            " { background-image: url(pictures/"+ item[8] +
+            ");background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
             # self.pictures[index].setStyleSheet("#list_picture_"+str(index)+" { background-image: url(pictures/book.jpeg);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
             self.pictures[index].setObjectName("list_picture_" + str(index))        
             self.gridLayout_5.addWidget(self.pictures[index], index, 0, 1, 1)
@@ -373,19 +373,20 @@ class Ui_MainWindow(object):
         publisher_exists = True if list(result)[0][0] == 1 else False
 
         if '' in inputDict.values():
-            print('field/fields can not be empty!')
+            self.OkMsgBox("warning", "failure", "input filed/fields can not be empty!")
 
         elif publisher_exists:
-            print('another publisher with this name found!')
+            self.OkMsgBox("warning", "failure", "another publisher with this name found!")
 
         elif not inputDict['phone_number'].isdigit():
-            print('wrong phone number!')
+            self.OkMsgBox("warning", "failure", "entered phone number is not valid!")
 
         else:  
-            query = f"INSERT INTO Publisher(name, phone_number, website_url) VALUES('{inputDict['name']}', '{inputDict['phone_number']}', '{inputDict['website_url']}')"
+            query = f"INSERT INTO Publisher(name, phone_number, website_url)"\
+                    +f"\n   VALUES('{inputDict['name']}', '{inputDict['phone_number']}', '{inputDict['website_url']}')"
             db.engine.execute(text(query))
+            self.OkMsgBox("information", "success", "new publisher have been sucessfully added!")
             self.setupUi(MainWindow)           
-            print('new publisher added!')
 
 
 
@@ -422,24 +423,27 @@ class Ui_MainWindow(object):
 
            
             if bookExists:
-                print('another book with this name and publisher found!')
+                self.OkMsgBox("warning", "failure", "another book with this name and publisher found!")
             
             elif not inputDict['price'].isdigit():
-                print('wrong price input!!')
+                self.OkMsgBox("warning", "failure", "wrong price input!")
 
             elif not inputDict['quantity'].isdigit():
-                print('wrong quantity input!!')
+                self.OkMsgBox("warning", "failure", "wrong quantity input!")
 
             else:      
                 try:
                     url = str(random.randint(9999,9999999))+"_"+os.path.basename(inputDict['image_url'])
                     shutil.copy(inputDict['image_url'], f"pictures/{url}")
 
-                    query = f"INSERT INTO book(name, author, picture_url, price, description) VALUES('{inputDict['name']}', '{inputDict['author']}', '{url}', {inputDict['price']}, '{inputDict['description']}')"
+                    query = f"INSERT INTO book(name, author, picture_url, price, description)"\
+                            +f"\n   VALUES('{inputDict['name']}', '{inputDict['author']}', '{url}',"\
+                            +f" {inputDict['price']}, '{inputDict['description']}')"
                     db.engine.execute(text(query))
                     query = f"SELECT id FROM Book WHERE name='{inputDict['name']}' ORDER BY date_added DESC LIMIT 1"
                     insertedBook_id = list(db.engine.execute(text(query)))[0][0]
-                    query = f"INSERT INTO book_publisher(book_id, publisher_id, quantity) VALUES({insertedBook_id}, {publisher_id}, {inputDict['quantity']})"
+                    query = f"INSERT INTO book_publisher(book_id, publisher_id, quantity)"\
+                            +f"\n   VALUES({insertedBook_id}, {publisher_id}, {inputDict['quantity']})"
                     db.engine.execute(text(query))
 
                     for cat in self.categoryBoxes:
@@ -453,12 +457,11 @@ class Ui_MainWindow(object):
                     self.removeBooks()
                     self.fillBooks(self.baseQuery)
 
-                except Exception as e:
-                    print('something went wrong while uploading photo!')
-                    print(e)
+                except:
+                    self.OkMsgBox("warning", "failure", "something went wrong while uploading photo!")
 
         else:
-            print('field/fields can not be empty!')
+            self.OkMsgBox("warning", "failure", "input field/fields can not be empty!")
         
 
 
@@ -468,7 +471,6 @@ class Ui_MainWindow(object):
 
 
     def fillUsers(self, query):
-        print(query)
         users = list(db.engine.execute(text(query)))
 
         self.userObjects = []
@@ -607,23 +609,26 @@ class Ui_MainWindow(object):
 
         queries = [
             f"DELETE FROM User WHERE id={id}",
-            f"DELETE FROM Customer WHERE user_id={id}"
+            f"DELETE FROM Customer WHERE user_id={id}",
+            f"DELETE FROM book_order WHERE customer_id={id}"
         ]
 
         for query in queries:
             db.engine.execute(text(query))
 
-        self.removeUsers()
-        self.fillUsers(self.userQuery)
+        # self.removeUsers()
+        self.OkMsgBox("information", "success", "user deleted sucessfully!")
+        self.setupUi(self.MainWindow)
+        # self.fillUsers(self.userQuery)
 
 
     def updateUser(self, action, id):
-        print(id, action)
         is_admin = 1 if action == 'promote' else 0
         
         query = f"UPDATE User SET is_admin={is_admin} WHERE id={id}"
         db.engine.execute(text(query))
 
+        self.OkMsgBox("information", "success", "user updates sucessfully!")
         self.removeUsers()
         self.fillUsers(self.userQuery)
 
@@ -645,8 +650,13 @@ class Ui_MainWindow(object):
             "SELECT SUM(quantity) FROM book_order",
             "SELECT SUM(price) FROM Book",
             "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id",
-            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id WHERE book_order.date_added>=(SELECT DATETIME('now', '-7 day'))",
-            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id WHERE book_order.date_added>=(SELECT DATETIME('now', '-30 day'))"
+            
+            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id"\
+            +"\n    WHERE book_order.date_added>=(SELECT DATETIME('now', '-7 day'))",
+
+            "SELECT SUM(Book.price) FROM Book JOIN book_order ON Book.id=book_order.book_id"\
+            +"\n    WHERE book_order.date_added>=(SELECT DATETIME('now', '-30 day'))"
+
         ]
 
         for index in range(0, len(titles)):
@@ -712,7 +722,7 @@ class Ui_MainWindow(object):
         query = f"SELECT User.username, Customer.first_name, Customer.last_name, Customer.phone_number,"\
                 +"\n    Customer.address, User.password FROM User JOIN Customer"\
                 +f"\n    ON User.id=Customer.user_id Where User.username = '{username}'"
-        print(query)
+        
         infoData = list(db.engine.execute(text(query)))[0]
         self.initialInfo = [info for info in infoData]
 
@@ -743,11 +753,12 @@ class Ui_MainWindow(object):
             query = f"UPDATE Customer SET first_name='{newData[1]}', last_name='{newData[2]}',"\
                     +f"\n   phone_number='{newData[3]}', address='{newData[4]}' WHERE Customer.user_id={self.user_id}"
             db.engine.execute(text(query))
-            print('user info updated!')
+            self.OkMsgBox("information", "success", "user info updated!")
             self.initialInfo = newData
             self.setupUi(self.MainWindow)
         else:
-            print('no changes detected!')
+            self.OkMsgBox("warning", "failure", "no changes detected!")
+            
 
 
     # layout functions

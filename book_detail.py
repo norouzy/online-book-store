@@ -22,7 +22,6 @@ class Ui_BookDetailWindow(object):
                             f"\n    WHERE book_category.book_id={self.book_id}"
 
         self.bookData = list(db.engine.execute(text(self.baseQuery)))
-        print(self.bookData)
         self.bookData = self.bookData[0]
 
     def fillItems(self):
