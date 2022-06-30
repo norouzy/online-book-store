@@ -13,8 +13,8 @@ class Ui_LoginWindow(object):
         password = self.login_password.text()
         # username = "norouzy"
         # password = "123456789"
-        username = "admin"
-        password = "root"
+        # username = "admin"
+        # password = "root"
 
         if username and password:
             query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{username}' and password='{password}')"     

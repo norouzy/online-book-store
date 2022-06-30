@@ -34,18 +34,18 @@ VALUES('Ali', 'Hasanzadeh', 2, '09305898647', 'Lorem ipsum dolor sit amet,
 
 -- new books
 INSERT INTO book(name, author, picture_url, price, description)
-VALUES('Nineteen Eighty-Four', 'George Orwell','pictures/1984.jpg', 
+VALUES('Nineteen Eighty-Four', 'George Orwell','1984.jpg', 
 80000, 'Lorem ipsum dolor sit amet, te eam elit modus homero vis.'),
-('The Plague', 'Albert Camus','pictures/the_plague.jpg', 
+('The Plague', 'Albert Camus','the_plague.jpg', 
 106000, 'Lorem ipsum dolor sit amet'), 
-('Java: How to Program', 'Harvey Deitel and Paul Deitel','pictures/Java_How_to_Program.jpg', 
+('Java: How to Program', 'Harvey Deitel and Paul Deitel','Java_How_to_Program.jpg', 
 190000, 'Lorem ipsum dolor sit amet,
  nam ut facer erant quaestio,
  duo cu scripta epicurei philosophia. Molestie repudiandae.'), 
-('Under the Banner of Heaven', 'Jon Krakauer','pictures/under_the_banner_of_heaven.jpg', 
+('Under the Banner of Heaven', 'Jon Krakauer','under_the_banner_of_heaven.jpg', 
 77000, 'Lorem ipsum dolor sit amet, 
 diam summo duo ad, ne inani tractatos torquatos pro.'), 
-('Mein Kampf', 'Adolf Hitle','pictures/mein_kampf.jpg', 
+('Mein Kampf', 'Adolf Hitle','mein_kampf.jpg', 
 98400, 'Lorem ipsum dolor sit amet, 
 diam summo duo ad');
 
