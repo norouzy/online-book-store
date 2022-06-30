@@ -183,11 +183,11 @@ class Ui_MainWindow(object):
             self.pictures[index].setObjectName("list_picture_" + str(index))        
             self.gridLayout_5.addWidget(self.pictures[index], index, 0, 1, 1)
             # giving values
-            self.label_list_name_0.setText('book name: ' + item[0])
-            self.label_list_quantity_0.setText('number in stock: ' + str(item[1]))
-            self.label_list_author_0.setText('author: ' + item[2])
-            self.label_list_price_0.setText('price: ' + str(item[3]))
-            self.label_list_publisher_0.setText('publisher: ' + item[4])
+            self.label_list_name_0.setText('📚 book name: ' + item[0])
+            self.label_list_quantity_0.setText('🧮 number in stock: ' + str('{:,}'.format(item[1])))
+            self.label_list_author_0.setText('✒️ author: ' + item[2])
+            self.label_list_price_0.setText('💰 price: ' + str('{:,}'.format(item[3]))+ "💲")
+            self.label_list_publisher_0.setText('🗂 publisher: ' + item[4])
         
 
     def bookDetails(self, book_id):
@@ -677,8 +677,10 @@ class Ui_MainWindow(object):
 
             self.label_inventory_title_0.setText(titles[index]) 
             if index>1:
+                qResult = '{:,}'.format(qResult)
                 self.label_inventory_0.setText(str(qResult) + "💲")
             else:
+                qResult = '{:,}'.format(qResult)
                 self.label_inventory_0.setText(str(qResult))
 
    
@@ -713,9 +715,12 @@ class Ui_MainWindow(object):
                 totalPrice = orders[row][4] * orders[row][5]
 
                 if col == 6:
-                    item.setText(str(totalPrice))
+                    item.setText(str('{:,}'.format(totalPrice)))
                 else:
-                    item.setText(str(orders[row][col]))
+                    if col>3 and not col==6:
+                        item.setText(str('{:,}'.format(orders[row][col])))
+                    else:
+                        item.setText(str(orders[row][col]))
 
 
     def fillInfo(self):
