@@ -1,12 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from scripts.tables import db
 from sqlalchemy import text
-import shutil
-import re
+import shutil ,re , os , random
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
-import os
-import random
 
 
 class Ui_BookEditWindow(object):
@@ -290,13 +287,3 @@ class Ui_BookEditWindow(object):
         self.label_addbook_price.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">price</span></p></body></html>"))
         self.btn_addbook_broswer.setText(_translate("MainWindow", "Broswer"))
         self.label_addbook_name.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">name</span></p></body></html>"))
-
-
-# if __name__ == "__main__":
-#     import sys
-#     app = QtWidgets.QApplication(sys.argv)
-#     MainWindow = QtWidgets.QMainWindow()
-#     ui = Ui_BookEditWindow()
-#     ui.setupUi(MainWindow)
-#     MainWindow.show()
-#     sys.exit(app.exec_())
