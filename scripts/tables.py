@@ -174,7 +174,7 @@ dataFillQueries = [
 ]
 
 
-file_exists = exists('db.sqlite3')
+file_exists = exists('scripts/db.sqlite3')
 
 if not file_exists:
     for table in tableQueries:

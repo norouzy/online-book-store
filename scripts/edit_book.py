@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from tables import db
+from scripts.tables import db
 from sqlalchemy import text
 import shutil
 import re
@@ -97,8 +97,8 @@ class Ui_BookEditWindow(object):
 
 
     def updateInfo(self):
-        from admin_panel import Ui_MainWindow
-        import admin_panel
+        from scripts.panel import Ui_MainWindow
+        import scripts.panel
 
         self.newData = [
             self.input_addbook_picture.text(),

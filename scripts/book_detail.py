@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from tables import db
+from scripts.tables import db
 from sqlalchemy import text
 
 

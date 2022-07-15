@@ -1,8 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from tables import db
+from scripts.tables import db
 from sqlalchemy import text
 
+dir = "./"
 
 class Ui_LoginWindow(object):
     # main functions
@@ -11,10 +12,6 @@ class Ui_LoginWindow(object):
 
         username = self.login_username.text()
         password = self.login_password.text()
-        # username = "norouzy"
-        # password = "123456789"
-        # username = "admin"
-        # password = "root"
 
         if username and password:
             query = f"SELECT EXISTS(SELECT * FROM User WHERE username='{username}' and password='{password}')"     
@@ -29,7 +26,7 @@ class Ui_LoginWindow(object):
                 is_admin = True if list(db.engine.execute(text(query)))[0][0] == 1 else False
                 
                 # calling user panel
-                from admin_panel import Ui_MainWindow
+                from scripts.panel import Ui_MainWindow
                 ui = Ui_MainWindow(user_id, is_admin, username ,MainWindow)
                 ui.setupUi(MainWindow)
             else:
@@ -80,11 +77,9 @@ class Ui_LoginWindow(object):
             self.createMsgBox("information", "sign up success", "new user created!")
 
             # calling user panel
-            from admin_panel import Ui_MainWindow
+            from scripts.panel import Ui_MainWindow
             ui = Ui_MainWindow(user_id, False, valuesDict['username'], MainWindow)
             ui.setupUi(MainWindow)
-
-            from admin_panel import Ui_MainWindow
             ui = Ui_MainWindow(valuesDict['username'],valuesDict['password'],MainWindow)
             ui.setupUi(MainWindow)
 
@@ -132,7 +127,7 @@ class Ui_LoginWindow(object):
         self.gridLayout.addWidget(self.login_username, 1, 1, 1, 1, QtCore.Qt.AlignVCenter)
         self.graphicsView = QtWidgets.QGraphicsView(self.formWidget)
         self.graphicsView.setStyleSheet("color: rgb(80, 255, 121);")
-        self.graphicsView.setStyleSheet("#graphicsView { background-image: url(img/login.png);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
+        self.graphicsView.setStyleSheet("#graphicsView { background-image: url("+dir+"/img/login.png);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
         self.graphicsView.setObjectName("graphicsView")
         self.gridLayout.addWidget(self.graphicsView, 0, 1, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.label = QtWidgets.QLabel(self.formWidget)
@@ -192,7 +187,7 @@ class Ui_LoginWindow(object):
         self.gridLayout_2.addWidget(self.label_4, 4, 0, 1, 1)
         self.graphicsView_2 = QtWidgets.QGraphicsView(self.formWidget_2)
         self.graphicsView_2.setObjectName("graphicsView_2")
-        self.graphicsView_2.setStyleSheet("#graphicsView_2 { background-image: url(img/signup.png);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
+        self.graphicsView_2.setStyleSheet("#graphicsView_2 { background-image: url("+dir+"/img/signup.png);background-repeat: no-repeat;background-attachment: fixed;background-position: center;border:0px;}")
         self.gridLayout_2.addWidget(self.graphicsView_2, 0, 1, 1, 1, QtCore.Qt.AlignHCenter)
         self.label_7 = QtWidgets.QLabel(self.formWidget_2)
         self.label_7.setObjectName("label_7")
@@ -238,14 +233,3 @@ class Ui_LoginWindow(object):
         self.label_7.setText(_translate("MainWindow", "Name"))
         self.label_8.setText(_translate("MainWindow", "Last Name"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.signup), _translate("MainWindow", "🔵 Sign Up"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon('img/icon.png'))
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_LoginWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

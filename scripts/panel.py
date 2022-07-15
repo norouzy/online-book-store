@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-from tables import db
+from scripts.tables import db
 from sqlalchemy import false, text
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal
@@ -44,12 +44,12 @@ class Ui_MainWindow(object):
 
 
     def logout(self):
-        from login import Ui_LoginWindow
+        from scripts.login import Ui_LoginWindow
         ui = Ui_LoginWindow()
         ui.setupUi(self.MainWindow)
 
     def logout(self):
-        from login import Ui_LoginWindow
+        from scripts.login import Ui_LoginWindow
         ui = Ui_LoginWindow()
         ui.setupUi(self.MainWindow)
 
@@ -186,9 +186,9 @@ class Ui_MainWindow(object):
         
 
     def bookDetails(self, book_id):
-        import book_detail
+        from scripts.book_detail import Ui_BookDetailWindow
         self.bookDetailUi = QtWidgets.QMainWindow()
-        ui_book_detail = book_detail.Ui_BookDetailWindow(book_id)
+        ui_book_detail = Ui_BookDetailWindow(book_id)
         ui_book_detail.setupUi(self.bookDetailUi)
         self.bookDetailUi.show()
   
@@ -197,10 +197,10 @@ class Ui_MainWindow(object):
         self.setupUi(self.MainWindow)
     
     def editBook(self, book_id,MainWindow):
-        import edit_book
+        from scripts.edit_book import Ui_BookEditWindow
         self.MainWindow = MainWindow
         self.bookEditUi = QtWidgets.QMainWindow()
-        ui_book_detail = edit_book.Ui_BookEditWindow(book_id,self)
+        ui_book_detail = Ui_BookEditWindow(book_id,self)
         ui_book_detail.setupUi(self.bookEditUi)
         self.bookEditUi.show() 
 
