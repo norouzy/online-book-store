@@ -1,6 +1,8 @@
 # Online Book Store Shop
-to run program run login.py
+run un.py file 
 
-admin :
+admin username and password:
 username : admin
 password : root
+
+
