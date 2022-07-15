@@ -207,14 +207,3 @@ class Ui_BookDetailWindow(object):
         self.category_book_detail_title_label.setText(_translate("BookDetailWindow", "category :"))
         # self.category_book_detail_label.setText(_translate("BookDetailWindow", "action ,comedy"))
         self.close_btn.setText(_translate("BookDetailWindow", "close"))
-
-
-# if __name__ == "__main__":
-#     print("hi")
-#     import sys
-#     app = QtWidgets.QApplication(sys.argv)
-#     BookDetailWindow = QtWidgets.QMainWindow()
-#     ui = Ui_BookDetailWindow()
-#     ui.setupUi(BookDetailWindow)
-#     BookDetailWindow.show()
-#     sys.exit(app.exec_())
